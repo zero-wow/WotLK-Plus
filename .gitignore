@@ -1,8 +1,50 @@
-# Local WoW client state and transient editor output do not belong in source control.
+# WoW runtime data and local configuration
 WTF/
-Cache/
 SavedVariables/
-*.bak
-*.log
-*.tmp
+*.lua.saved
+*.lua.bak
+
+# Credentials and local environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+secrets/
+
+# Editor, operating-system, and tool artifacts
+.vscode/
+.idea/
+*.code-workspace
 .DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Test, build, and packaging output
+coverage/
+test-results/
+reports/
+dist/
+build/
+out/
+release/
+releases/
+*.log
+*.zip
+*.7z
+*.rar
+
+# Dependency and language caches
+node_modules/
+vendor/
+.cache/
+__pycache__/
+*.py[cod]
