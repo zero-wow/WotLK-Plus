@@ -1,0 +1,83 @@
+## Interface: 30300
+## Title: WotLK Plus
+## Notes: WotLK 3.3.5 quality-of-life, banking, sorting, and interface tools. Ascension extensions activate only when their APIs are present.
+## Author: Codex
+## Version: 0.15.0
+## OptionalDeps: ChocolateBar, ElvUI, Bagnon, AdiBags, AscendedSkillCards
+## SavedVariables: WotLKPlusDB, AscensionPlusDB
+
+# Keep the bootstrap and slash registrar first so commands survive feature errors.
+core\Main.lua
+core\Compatibility.lua
+modules\slash\Commands.lua
+
+# Embedded libraries used by the LDB and minimap launcher
+embeds.xml
+
+# Core services
+core\Utils.lua
+core\Database.lua
+core\Modules.lua
+core\ConfigRegistry.lua
+
+# Configuration UI
+ui\Theme.lua
+ui\Tree.lua
+ui\Pages.lua
+ui\ConfigWindow.lua
+
+# LDB and minimap launcher
+modules\launcher\Launcher.lua
+modules\launcher\LauncherModule.lua
+
+# Ascension extension data (registered only when Ascension APIs are present)
+data\Classes.lua
+
+# Skill Card Ledger (Ascension extension)
+modules\skillcards\SkillCardCatalog.lua
+modules\skillcards\SkillCardWindow.lua
+modules\skillcards\SkillCardsModule.lua
+
+# Class Library (Ascension extension)
+modules\classes\ClassesModule.lua
+
+# Quality-of-life modules
+modules\qol\QoLModule.lua
+modules\qol\destroy\DestroyConfirm.lua
+modules\qol\destroy\DestroyModule.lua
+
+# Banking modules
+modules\banking\BankingCategories.lua
+modules\banking\CategoryConfig.lua
+modules\banking\ContainerStore.lua
+modules\banking\providers\CharacterBank.lua
+modules\banking\providers\GuildStyleBank.lua
+modules\banking\sorter\Planner.lua
+modules\banking\sorter\AdaptivePacing.lua
+modules\banking\sorter\Exclusions.lua
+modules\banking\sorter\KeeperProvider.lua
+modules\banking\sorter\ContainerProvider.lua
+modules\banking\sorter\SorterController.lua
+modules\banking\sorter\SortButton.lua
+modules\banking\sorter\Presentation.lua
+modules\banking\sorter\adapters\ElvUI.lua
+modules\banking\sorter\adapters\Bagnon.lua
+modules\banking\sorter\adapters\AdiBags.lua
+modules\banking\sorter\adapters\Blizzard.lua
+modules\banking\PretendReport.lua
+modules\banking\DepositController.lua
+modules\banking\integrations\ElvUI.lua
+modules\banking\DepositPanel.lua
+modules\banking\BankingModule.lua
+
+# Appearance collection (Ascension extension)
+modules\transmog\AutoCollect.lua
+modules\transmog\services\AppearanceQueue.lua
+modules\transmog\services\AppearanceCatalog.lua
+modules\transmog\services\AppearanceRules.lua
+modules\transmog\AppearancePrompt.lua
+modules\transmog\AppearanceInbox.lua
+modules\transmog\TransmogModule.lua
+
+# Final initialization after every definition is available
+core\Bootstrap.lua
