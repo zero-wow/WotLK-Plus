@@ -22,6 +22,15 @@ AP.defaults = AP.defaults or {
         minimapPos = 220,
       },
     },
+    minimapPalette = {
+      collectButtons = true,
+      locked = false,
+      showTooltips = true,
+      point = "TOPRIGHT",
+      relPoint = "TOPRIGHT",
+      x = -8,
+      y = -8,
+    },
     window = {
       point = "CENTER",
       relPoint = "CENTER",
@@ -37,6 +46,7 @@ AP.defaults = AP.defaults or {
     banking = true,
     transmog = true,
     destroyConfirm = true,
+    minimapPalette = true,
   },
   skillCards = {
     migrationVersion = 0,

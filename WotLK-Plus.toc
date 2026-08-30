@@ -30,6 +30,11 @@ ui\ConfigWindow.lua
 modules\launcher\Launcher.lua
 modules\launcher\LauncherModule.lua
 
+# Minimap launcher palette
+modules\minimap\MinimapDiscovery.lua
+modules\minimap\MinimapPalette.lua
+modules\minimap\MinimapPaletteModule.lua
+
 # Ascension extension data (registered only when Ascension APIs are present)
 data\Classes.lua
 
