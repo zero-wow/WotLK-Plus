@@ -75,7 +75,9 @@ local function getLabel(frame, name)
 end
 
 local function getIcon(frame)
-  local normal = call(frame, "GetNormalTexture") or frame.icon or frame.Icon
+  -- LDB and most minimap addons keep their real art in icon/Icon; normal textures
+  -- are frequently decorative rings, backgrounds, or highlight layers.
+  local normal = frame.icon or frame.Icon or call(frame, "GetNormalTexture")
   local texture
   local coords
   if type(normal) == "string" then
@@ -84,7 +86,14 @@ local function getIcon(frame)
     texture = call(normal, "GetTexture")
     local left, right, top, bottom = call(normal, "GetTexCoord")
     if left and right and top and bottom then
-      coords = { left, right, top, bottom }
+      local horizontalInset = (right - left) * 0.04
+      local verticalInset = (bottom - top) * 0.04
+      coords = {
+        left + horizontalInset,
+        right - horizontalInset,
+        top + verticalInset,
+        bottom - verticalInset,
+      }
     end
   end
 

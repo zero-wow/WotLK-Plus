@@ -12,7 +12,8 @@ local function texture(path)
 end
 
 local function button(name, label, shown)
-  return {
+  local liveIcon = texture("Interface\\Icons\\INV_Misc_QuestionMark")
+  local frame = {
     tooltipText = label,
     IsObjectType = function(_, kind)
       return kind == "Button"
@@ -27,9 +28,11 @@ local function button(name, label, shown)
       return name
     end,
     GetNormalTexture = function()
-      return texture("Interface\\Icons\\INV_Misc_QuestionMark")
+      return texture("Interface\\Icons\\INV_Misc_Bag_07")
     end,
   }
+  frame.icon = liveIcon
+  return frame
 end
 
 local hidden = button("LibDBIcon10_AtlasLoot", "AtlasLoot", false)
@@ -55,7 +58,8 @@ local Discovery = _G.WotLKPlus.MinimapPaletteDiscovery
 local entries = Discovery:GetEntries()
 assert(#entries == 2, "only shown, unprotected, non-standard launcher buttons should be included")
 assert(entries[1].label == "Auctionator" and entries[2].label == "Questie", "entries must use stable alphabetical labels")
-assert(entries[2].coords[1] == 0.1 and entries[2].coords[4] == 0.8, "normal texture coordinates must be preserved")
+assert(entries[2].texture == "Interface\\Icons\\INV_Misc_QuestionMark", "the live icon region must win over decorative normal textures")
+assert(math.abs(entries[2].coords[1] - 0.132) < 0.0001 and math.abs(entries[2].coords[4] - 0.776) < 0.0001, "live icon coordinates must be slightly inset")
 
 entries = Discovery:GetEntries({ [hidden] = true })
 assert(#entries == 3 and entries[1].label == "AtlasLoot", "buttons hidden by the palette must stay discoverable")
