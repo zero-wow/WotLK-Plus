@@ -36,8 +36,8 @@ AP.defaults = AP.defaults or {
       relPoint = "CENTER",
       x = 0,
       y = 0,
-      width = 1040,
-      height = 660,
+      width = 960,
+      height = 590,
     },
   },
   modules = {
@@ -361,6 +361,23 @@ function Database:Initialize()
   end
   if type(AscensionPlusDB) == "table" then
     copyMissing(LevoDB, AscensionPlusDB)
+  end
+
+  -- Only replace the previous stock size; a manually resized panel is intentional.
+  local interface = type(LevoDB.interface) == "table" and LevoDB.interface or nil
+  local window = interface and type(interface.window) == "table" and interface.window or nil
+  if interface and interface.windowLayoutVersion ~= 1 then
+    if window
+      and tonumber(window.width) == 1040
+      and tonumber(window.height) == 660
+      and (window.point == nil or window.point == "CENTER")
+      and (window.relPoint == nil or window.relPoint == "CENTER")
+      and (window.x == nil or tonumber(window.x) == 0)
+      and (window.y == nil or tonumber(window.y) == 0) then
+      window.width = 960
+      window.height = 590
+    end
+    interface.windowLayoutVersion = 1
   end
 
   self.db = AP.Utils.MergeDefaults(LevoDB, AP.defaults)

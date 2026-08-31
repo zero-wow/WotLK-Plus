@@ -2,9 +2,9 @@ local _, AP = ...
 AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Theme = AP.UI.Theme
-local CONTENT_INSET = 18
+local CONTENT_INSET = 12
 local ITEM_GAP = 1
-local SECTION_GAP = 14
+local SECTION_GAP = 8
 
 local Pages = {}
 AP.UI.Pages = Pages
@@ -149,12 +149,12 @@ function Pages:Create(parent)
 
   frame.Scroll = CreateFrame("ScrollFrame", "LevoPagesScroll", frame, "UIPanelScrollFrameTemplate")
   frame.Scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", 1, -1)
-  frame.Scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -20, 1)
+  frame.Scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -16, 1)
   Theme:SkinScrollFrame(frame.Scroll)
   frame.Scroll:EnableMouseWheel(true)
   frame.Scroll:SetScript("OnMouseWheel", function(self, delta)
     local range = self:GetVerticalScrollRange() or 0
-    local nextValue = (self:GetVerticalScroll() or 0) - (delta * 32)
+    local nextValue = (self:GetVerticalScroll() or 0) - (delta * 28)
     nextValue = AP.Utils.Clamp(nextValue, 0, range)
     self:SetVerticalScroll(nextValue)
   end)
@@ -225,8 +225,8 @@ function Pages:Create(parent)
   frame.CaptureOverlay.Panel = CreateFrame("Frame", nil, frame.CaptureOverlay)
   Theme:ApplyBackdrop(frame.CaptureOverlay.Panel, Theme.colors.panel, Theme.colors.border)
   frame.CaptureOverlay.Panel:SetFrameLevel(frame.CaptureOverlay.Input:GetFrameLevel() + 1)
-  frame.CaptureOverlay.Panel:SetWidth(500)
-  frame.CaptureOverlay.Panel:SetHeight(230)
+  frame.CaptureOverlay.Panel:SetWidth(460)
+  frame.CaptureOverlay.Panel:SetHeight(208)
   frame.CaptureOverlay.Panel:SetPoint("CENTER", frame.CaptureOverlay, "CENTER", 0, 0)
   frame.CaptureOverlay.Panel:EnableMouse(true)
   frame.CaptureOverlay.Panel:EnableMouseWheel(true)
@@ -234,71 +234,71 @@ function Pages:Create(parent)
   frame.CaptureOverlay.TitleBar = frame.CaptureOverlay.Panel:CreateTexture(nil, "BACKGROUND")
   frame.CaptureOverlay.TitleBar:SetPoint("TOPLEFT", frame.CaptureOverlay.Panel, "TOPLEFT", 1, -1)
   frame.CaptureOverlay.TitleBar:SetPoint("TOPRIGHT", frame.CaptureOverlay.Panel, "TOPRIGHT", -1, -1)
-  frame.CaptureOverlay.TitleBar:SetHeight(38)
+  frame.CaptureOverlay.TitleBar:SetHeight(32)
   Theme:Paint(frame.CaptureOverlay.TitleBar, Theme.colors.titlebar)
 
   frame.CaptureOverlay.Title = frame.CaptureOverlay.Panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-  frame.CaptureOverlay.Title:SetPoint("TOPLEFT", frame.CaptureOverlay.Panel, "TOPLEFT", 16, -14)
-  frame.CaptureOverlay.Title:SetPoint("TOPRIGHT", frame.CaptureOverlay.Panel, "TOPRIGHT", -42, -14)
+  frame.CaptureOverlay.Title:SetPoint("TOPLEFT", frame.CaptureOverlay.Panel, "TOPLEFT", 12, -10)
+  frame.CaptureOverlay.Title:SetPoint("TOPRIGHT", frame.CaptureOverlay.Panel, "TOPRIGHT", -34, -10)
   frame.CaptureOverlay.Title:SetText("Capture Keybind")
   frame.CaptureOverlay.Title:SetTextColor(Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3], 1)
-  Theme:TrySetTitleFont(frame.CaptureOverlay.Title, 19)
+  Theme:TrySetTitleFont(frame.CaptureOverlay.Title, 18)
 
   frame.CaptureOverlay.CloseButton = CreateFrame("Button", nil, frame.CaptureOverlay.Panel)
-  frame.CaptureOverlay.CloseButton:SetWidth(22)
-  frame.CaptureOverlay.CloseButton:SetHeight(22)
-  frame.CaptureOverlay.CloseButton:SetPoint("TOPRIGHT", frame.CaptureOverlay.Panel, "TOPRIGHT", -8, -7)
+  frame.CaptureOverlay.CloseButton:SetWidth(20)
+  frame.CaptureOverlay.CloseButton:SetHeight(20)
+  frame.CaptureOverlay.CloseButton:SetPoint("TOPRIGHT", frame.CaptureOverlay.Panel, "TOPRIGHT", -7, -6)
   Theme:SkinCloseButton(frame.CaptureOverlay.CloseButton, "x")
 
   frame.CaptureOverlay.Divider = frame.CaptureOverlay.Panel:CreateTexture(nil, "ARTWORK")
-  frame.CaptureOverlay.Divider:SetPoint("TOPLEFT", frame.CaptureOverlay.Panel, "TOPLEFT", 14, -39)
-  frame.CaptureOverlay.Divider:SetPoint("TOPRIGHT", frame.CaptureOverlay.Panel, "TOPRIGHT", -14, -39)
+  frame.CaptureOverlay.Divider:SetPoint("TOPLEFT", frame.CaptureOverlay.Panel, "TOPLEFT", 12, -33)
+  frame.CaptureOverlay.Divider:SetPoint("TOPRIGHT", frame.CaptureOverlay.Panel, "TOPRIGHT", -12, -33)
   frame.CaptureOverlay.Divider:SetHeight(1)
   Theme:Paint(frame.CaptureOverlay.Divider, Theme.colors.line)
 
   frame.CaptureOverlay.Help = frame.CaptureOverlay.Panel:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   frame.CaptureOverlay.Help:SetJustifyH("LEFT")
   frame.CaptureOverlay.Help:SetJustifyV("TOP")
-  frame.CaptureOverlay.Help:SetPoint("TOPLEFT", frame.CaptureOverlay.Panel, "TOPLEFT", 16, -49)
-  frame.CaptureOverlay.Help:SetPoint("TOPRIGHT", frame.CaptureOverlay.Panel, "TOPRIGHT", -16, -49)
+  frame.CaptureOverlay.Help:SetPoint("TOPLEFT", frame.CaptureOverlay.Panel, "TOPLEFT", 12, -42)
+  frame.CaptureOverlay.Help:SetPoint("TOPRIGHT", frame.CaptureOverlay.Panel, "TOPRIGHT", -12, -42)
   frame.CaptureOverlay.Help:SetText(KEY_CAPTURE_HELP)
 
   frame.CaptureOverlay.CaptureArea = CreateFrame("Button", nil, frame.CaptureOverlay.Panel)
   Theme:SkinDropTarget(frame.CaptureOverlay.CaptureArea)
-  frame.CaptureOverlay.CaptureArea:SetPoint("TOPLEFT", frame.CaptureOverlay.Panel, "TOPLEFT", 16, -82)
-  frame.CaptureOverlay.CaptureArea:SetPoint("TOPRIGHT", frame.CaptureOverlay.Panel, "TOPRIGHT", -16, -82)
-  frame.CaptureOverlay.CaptureArea:SetHeight(86)
+  frame.CaptureOverlay.CaptureArea:SetPoint("TOPLEFT", frame.CaptureOverlay.Panel, "TOPLEFT", 12, -72)
+  frame.CaptureOverlay.CaptureArea:SetPoint("TOPRIGHT", frame.CaptureOverlay.Panel, "TOPRIGHT", -12, -72)
+  frame.CaptureOverlay.CaptureArea:SetHeight(76)
   frame.CaptureOverlay.CaptureArea:RegisterForClicks("AnyDown")
   frame.CaptureOverlay.CaptureArea:EnableMouseWheel(true)
 
   frame.CaptureOverlay.CaptureLabel = frame.CaptureOverlay.CaptureArea:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  frame.CaptureOverlay.CaptureLabel:SetPoint("TOPLEFT", frame.CaptureOverlay.CaptureArea, "TOPLEFT", 9, -7)
+  frame.CaptureOverlay.CaptureLabel:SetPoint("TOPLEFT", frame.CaptureOverlay.CaptureArea, "TOPLEFT", 7, -6)
   frame.CaptureOverlay.CaptureLabel:SetText("LIVE INPUT")
   frame.CaptureOverlay.CaptureLabel:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], 1)
 
   frame.CaptureOverlay.Candidate = frame.CaptureOverlay.CaptureArea:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-  frame.CaptureOverlay.Candidate:SetPoint("TOPLEFT", frame.CaptureOverlay.CaptureArea, "TOPLEFT", 9, -27)
-  frame.CaptureOverlay.Candidate:SetPoint("TOPRIGHT", frame.CaptureOverlay.CaptureArea, "TOPRIGHT", -9, -27)
+  frame.CaptureOverlay.Candidate:SetPoint("TOPLEFT", frame.CaptureOverlay.CaptureArea, "TOPLEFT", 7, -24)
+  frame.CaptureOverlay.Candidate:SetPoint("TOPRIGHT", frame.CaptureOverlay.CaptureArea, "TOPRIGHT", -7, -24)
   frame.CaptureOverlay.Candidate:SetJustifyH("CENTER")
   frame.CaptureOverlay.Candidate:SetTextColor(Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3], 1)
 
   frame.CaptureOverlay.Status = frame.CaptureOverlay.CaptureArea:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  frame.CaptureOverlay.Status:SetPoint("BOTTOMLEFT", frame.CaptureOverlay.CaptureArea, "BOTTOMLEFT", 9, 7)
-  frame.CaptureOverlay.Status:SetPoint("BOTTOMRIGHT", frame.CaptureOverlay.CaptureArea, "BOTTOMRIGHT", -9, 7)
+  frame.CaptureOverlay.Status:SetPoint("BOTTOMLEFT", frame.CaptureOverlay.CaptureArea, "BOTTOMLEFT", 7, 6)
+  frame.CaptureOverlay.Status:SetPoint("BOTTOMRIGHT", frame.CaptureOverlay.CaptureArea, "BOTTOMRIGHT", -7, 6)
   frame.CaptureOverlay.Status:SetJustifyH("CENTER")
   frame.CaptureOverlay.Status:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], 1)
 
   frame.CaptureOverlay.SaveButton = CreateFrame("Button", nil, frame.CaptureOverlay.Panel)
-  frame.CaptureOverlay.SaveButton:SetWidth(100)
-  frame.CaptureOverlay.SaveButton:SetHeight(22)
-  frame.CaptureOverlay.SaveButton:SetPoint("BOTTOMRIGHT", frame.CaptureOverlay.Panel, "BOTTOMRIGHT", -16, 15)
+  frame.CaptureOverlay.SaveButton:SetWidth(90)
+  frame.CaptureOverlay.SaveButton:SetHeight(20)
+  frame.CaptureOverlay.SaveButton:SetPoint("BOTTOMRIGHT", frame.CaptureOverlay.Panel, "BOTTOMRIGHT", -12, 12)
   frame.CaptureOverlay.SaveButton:SetText("SAVE")
   Theme:SkinButton(frame.CaptureOverlay.SaveButton)
 
   frame.CaptureOverlay.CancelButton = CreateFrame("Button", nil, frame.CaptureOverlay.Panel)
-  frame.CaptureOverlay.CancelButton:SetWidth(100)
-  frame.CaptureOverlay.CancelButton:SetHeight(22)
-  frame.CaptureOverlay.CancelButton:SetPoint("RIGHT", frame.CaptureOverlay.SaveButton, "LEFT", -8, 0)
+  frame.CaptureOverlay.CancelButton:SetWidth(90)
+  frame.CaptureOverlay.CancelButton:SetHeight(20)
+  frame.CaptureOverlay.CancelButton:SetPoint("RIGHT", frame.CaptureOverlay.SaveButton, "LEFT", -6, 0)
   frame.CaptureOverlay.CancelButton:SetText("CANCEL")
   Theme:SkinButton(frame.CaptureOverlay.CancelButton)
 
@@ -527,7 +527,7 @@ function Pages:Create(parent)
 
   function frame:LayoutHeader(title, description, breadcrumb)
     local width = (self.Child:GetWidth() or 720) - (CONTENT_INSET * 2)
-    local y = -20
+    local y = -12
 
     self.Breadcrumb:ClearAllPoints()
     self.Breadcrumb:SetWidth(width)
@@ -536,7 +536,7 @@ function Pages:Create(parent)
       self.Breadcrumb:SetText(breadcrumb)
       self.Breadcrumb:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], Theme.colors.muted[4])
       self.Breadcrumb:Show()
-      y = y - self.Breadcrumb:GetStringHeight() - 5
+      y = y - self.Breadcrumb:GetStringHeight() - 3
     else
       self.Breadcrumb:SetText("")
       self.Breadcrumb:Hide()
@@ -558,7 +558,7 @@ function Pages:Create(parent)
     self.Description:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], Theme.colors.muted[4])
     if description ~= "" then
       self.Description:Show()
-      y = y - self.Description:GetStringHeight() - 14
+      y = y - self.Description:GetStringHeight() - 8
     else
       self.Description:Hide()
       y = y - 2
@@ -572,7 +572,7 @@ function Pages:Create(parent)
     self.HeaderAccent:ClearAllPoints()
     self.HeaderAccent:SetPoint("TOPLEFT", self.Child, "TOPLEFT", CONTENT_INSET, y + 1)
     self.HeaderAccent:Show()
-    y = y - 14
+    y = y - 8
 
     return width, y
   end
@@ -633,21 +633,21 @@ function Pages:Create(parent)
     Theme:Paint(item.Rule, Theme.colors.neutralLine or Theme.colors.line)
 
     item.Check = CreateFrame("CheckButton", nil, item)
-    item.Check:SetWidth(38)
-    item.Check:SetHeight(20)
-    item.Check:SetPoint("TOPRIGHT", item, "TOPRIGHT", 0, -10)
+    item.Check:SetWidth(34)
+    item.Check:SetHeight(18)
+    item.Check:SetPoint("TOPRIGHT", item, "TOPRIGHT", 0, -7)
     Theme:SkinCheckButton(item.Check)
 
     item.Label = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     item.Label:SetJustifyH("LEFT")
-    item.Label:SetPoint("TOPLEFT", item, "TOPLEFT", 0, -9)
-    item.Label:SetPoint("TOPRIGHT", item, "TOPRIGHT", -52, -9)
+    item.Label:SetPoint("TOPLEFT", item, "TOPLEFT", 0, -6)
+    item.Label:SetPoint("TOPRIGHT", item, "TOPRIGHT", -46, -6)
 
     item.Description = item:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     item.Description:SetJustifyH("LEFT")
     item.Description:SetJustifyV("TOP")
     item.Description:SetPoint("TOPLEFT", item.Label, "BOTTOMLEFT", 0, -2)
-    item.Description:SetPoint("TOPRIGHT", item, "TOPRIGHT", -52, -24)
+    item.Description:SetPoint("TOPRIGHT", item, "TOPRIGHT", -46, -20)
 
     self.items.toggle[index] = item
     return item
@@ -668,12 +668,12 @@ function Pages:Create(parent)
 
     item.Label = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     item.Label:SetJustifyH("LEFT")
-    item.Label:SetPoint("TOPLEFT", item, "TOPLEFT", 0, -9)
+    item.Label:SetPoint("TOPLEFT", item, "TOPLEFT", 0, -6)
 
     item.Button = CreateFrame("Button", nil, item)
     item.Button:SetWidth(150)
-    item.Button:SetHeight(24)
-    item.Button:SetPoint("TOPRIGHT", item, "TOPRIGHT", 0, -9)
+    item.Button:SetHeight(22)
+    item.Button:SetPoint("TOPRIGHT", item, "TOPRIGHT", 0, -6)
     Theme:SkinButton(item.Button)
 
     item.Description = item:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -693,23 +693,23 @@ function Pages:Create(parent)
 
     item = CreateFrame("Frame", nil, self.Child)
     item.Accent = item:CreateTexture(nil, "ARTWORK")
-    item.Accent:SetPoint("TOPLEFT", item, "TOPLEFT", 0, -7)
-    item.Accent:SetPoint("BOTTOMLEFT", item, "BOTTOMLEFT", 0, 8)
+    item.Accent:SetPoint("TOPLEFT", item, "TOPLEFT", 0, -5)
+    item.Accent:SetPoint("BOTTOMLEFT", item, "BOTTOMLEFT", 0, 6)
     item.Accent:SetWidth(2)
     Theme:Paint(item.Accent, Theme.colors.gold)
 
     item.Label = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     item.Label:SetJustifyH("LEFT")
-    item.Label:SetPoint("TOPLEFT", item, "TOPLEFT", 10, -7)
+    item.Label:SetPoint("TOPLEFT", item, "TOPLEFT", 8, -5)
 
     item.Value = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     item.Value:SetJustifyH("RIGHT")
-    item.Value:SetPoint("TOPRIGHT", item, "TOPRIGHT", 0, -7)
+    item.Value:SetPoint("TOPRIGHT", item, "TOPRIGHT", 0, -5)
 
     item.Description = item:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     item.Description:SetJustifyH("LEFT")
     item.Description:SetJustifyV("TOP")
-    item.Description:SetPoint("TOPLEFT", item.Label, "BOTTOMLEFT", 0, -3)
+    item.Description:SetPoint("TOPLEFT", item.Label, "BOTTOMLEFT", 0, -2)
 
     item.Rule = item:CreateTexture(nil, "ARTWORK")
     item.Rule:SetPoint("BOTTOMLEFT", item, "BOTTOMLEFT", 0, 0)
@@ -732,19 +732,19 @@ function Pages:Create(parent)
 
     item.Title = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     item.Title:SetJustifyH("LEFT")
-    item.Title:SetPoint("TOPLEFT", item, "TOPLEFT", 7, -5)
-    item.Title:SetPoint("TOPRIGHT", item, "TOPRIGHT", -7, -5)
+    item.Title:SetPoint("TOPLEFT", item, "TOPLEFT", 6, -4)
+    item.Title:SetPoint("TOPRIGHT", item, "TOPRIGHT", -6, -4)
 
     item.Path = item:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     item.Path:SetJustifyH("LEFT")
     item.Path:SetPoint("TOPLEFT", item.Title, "BOTTOMLEFT", 0, -2)
-    item.Path:SetPoint("TOPRIGHT", item, "TOPRIGHT", -7, -21)
+    item.Path:SetPoint("TOPRIGHT", item, "TOPRIGHT", -6, -19)
 
     item.Summary = item:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     item.Summary:SetJustifyH("LEFT")
     item.Summary:SetJustifyV("TOP")
     item.Summary:SetPoint("TOPLEFT", item.Path, "BOTTOMLEFT", 0, -2)
-    item.Summary:SetPoint("TOPRIGHT", item, "TOPRIGHT", -7, -34)
+    item.Summary:SetPoint("TOPRIGHT", item, "TOPRIGHT", -6, -31)
 
     self.items.result[index] = item
     return item
@@ -786,25 +786,25 @@ function Pages:Create(parent)
 
     item.ValueShell = CreateFrame("Frame", nil, item)
     Theme:ApplyBackdrop(item.ValueShell, Theme.colors.inset, { Theme.colors.border[1], Theme.colors.border[2], Theme.colors.border[3], 0.30 })
-    item.ValueShell:SetHeight(22)
+    item.ValueShell:SetHeight(20)
 
     item.Value = item.ValueShell:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     item.Value:SetJustifyH("LEFT")
-    item.Value:SetPoint("LEFT", item.ValueShell, "LEFT", 7, 0)
-    item.Value:SetPoint("RIGHT", item.ValueShell, "RIGHT", -7, 0)
+    item.Value:SetPoint("LEFT", item.ValueShell, "LEFT", 6, 0)
+    item.Value:SetPoint("RIGHT", item.ValueShell, "RIGHT", -6, 0)
 
     item.SetButton = CreateFrame("Button", nil, item)
-    item.SetButton:SetWidth(96)
-    item.SetButton:SetHeight(20)
+    item.SetButton:SetWidth(88)
+    item.SetButton:SetHeight(18)
     item.SetButton:SetText("Set Hotkey")
-    item.SetButton:SetPoint("TOPLEFT", item.ValueShell, "BOTTOMLEFT", 0, -4)
+    item.SetButton:SetPoint("TOPLEFT", item.ValueShell, "BOTTOMLEFT", 0, -3)
     Theme:SkinButton(item.SetButton)
 
     item.ClearButton = CreateFrame("Button", nil, item)
-    item.ClearButton:SetWidth(70)
-    item.ClearButton:SetHeight(20)
+    item.ClearButton:SetWidth(64)
+    item.ClearButton:SetHeight(18)
     item.ClearButton:SetText("Clear")
-    item.ClearButton:SetPoint("LEFT", item.SetButton, "RIGHT", 8, 0)
+    item.ClearButton:SetPoint("LEFT", item.SetButton, "RIGHT", 6, 0)
     Theme:SkinButton(item.ClearButton)
 
     self.items.keybind[index] = item
@@ -838,7 +838,7 @@ function Pages:Create(parent)
       end
 
       button = CreateFrame("Button", nil, self)
-      button:SetHeight(22)
+      button:SetHeight(20)
       Theme:SkinButton(button)
       self.Buttons[choiceIndex] = button
       return button
@@ -863,7 +863,7 @@ function Pages:Create(parent)
 
     item.Label = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     item.Label:SetJustifyH("LEFT")
-    item.Label:SetPoint("TOPLEFT", item, "TOPLEFT", 0, -9)
+    item.Label:SetPoint("TOPLEFT", item, "TOPLEFT", 0, -6)
 
     item.Description = item:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     item.Description:SetJustifyH("LEFT")
@@ -872,7 +872,7 @@ function Pages:Create(parent)
 
     item.SelectButton = CreateFrame("Button", nil, item)
     item.SelectButton:SetWidth(200)
-    item.SelectButton:SetHeight(24)
+    item.SelectButton:SetHeight(22)
     Theme:SkinButton(item.SelectButton)
 
     self.items.select[index] = item
@@ -900,23 +900,23 @@ function Pages:Create(parent)
 
     item.DropBox = CreateFrame("Button", nil, item)
     Theme:SkinDropTarget(item.DropBox)
-    item.DropBox:SetHeight(26)
+    item.DropBox:SetHeight(24)
 
     item.DropText = item.DropBox:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    item.DropText:SetPoint("LEFT", item.DropBox, "LEFT", 7, 0)
-    item.DropText:SetPoint("RIGHT", item.DropBox, "RIGHT", -7, 0)
+    item.DropText:SetPoint("LEFT", item.DropBox, "LEFT", 6, 0)
+    item.DropText:SetPoint("RIGHT", item.DropBox, "RIGHT", -6, 0)
     item.DropText:SetJustifyH("LEFT")
     item.DropText:SetText("Drag an item here to blacklist it")
 
     item.ClearButton = CreateFrame("Button", nil, item)
     item.ClearButton:SetWidth(90)
-    item.ClearButton:SetHeight(20)
+    item.ClearButton:SetHeight(18)
     item.ClearButton:SetText("Clear All")
     Theme:SkinButton(item.ClearButton)
 
     item.Empty = item:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     item.Empty:SetJustifyH("LEFT")
-    item.Empty:SetPoint("TOPLEFT", item.DropBox, "BOTTOMLEFT", 0, -10)
+    item.Empty:SetPoint("TOPLEFT", item.DropBox, "BOTTOMLEFT", 0, -6)
     item.Empty:SetText("No blacklisted items.")
 
     item.rows = {}
@@ -929,18 +929,18 @@ function Pages:Create(parent)
 
       row = CreateFrame("Frame", nil, self)
       Theme:ApplyBackdrop(row, { 0.06, 0.07, 0.09, 0.8 }, Theme.colors.line)
-      row:SetHeight(24)
+      row:SetHeight(22)
 
       row.Text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
       row.Text:SetJustifyH("LEFT")
-      row.Text:SetPoint("LEFT", row, "LEFT", 8, 0)
-      row.Text:SetPoint("RIGHT", row, "RIGHT", -74, 0)
+      row.Text:SetPoint("LEFT", row, "LEFT", 6, 0)
+      row.Text:SetPoint("RIGHT", row, "RIGHT", -68, 0)
 
       row.Remove = CreateFrame("Button", nil, row)
-      row.Remove:SetWidth(62)
-      row.Remove:SetHeight(20)
+      row.Remove:SetWidth(58)
+      row.Remove:SetHeight(18)
       row.Remove:SetText("Remove")
-      row.Remove:SetPoint("RIGHT", row, "RIGHT", -4, 0)
+      row.Remove:SetPoint("RIGHT", row, "RIGHT", -3, 0)
       Theme:SkinButton(row.Remove)
 
       self.rows[rowIndex] = row
@@ -1033,10 +1033,10 @@ function Pages:Create(parent)
           item.Body:Hide()
         end
 
-        height = math.max(1, height) + (isSection and 4 or 0)
+        height = math.max(1, height) + (isSection and 2 or 0)
         item:SetHeight(height)
         item:Show()
-        y = y - height - (isSection and SECTION_GAP or 8)
+        y = y - height - (isSection and SECTION_GAP or 4)
       elseif optionType == "status" then
         statusIndex = statusIndex + 1
         local item = self:AcquireStatus(statusIndex)
@@ -1070,9 +1070,9 @@ function Pages:Create(parent)
         end
         Theme:Paint(item.Accent, color)
 
-        local height = 30
+        local height = 26
         if description ~= "" then
-          height = math.max(48, 18 + item.Description:GetStringHeight() + 14)
+          height = math.max(38, 16 + item.Description:GetStringHeight() + 9)
         end
         item:SetHeight(height)
         y = y - height - ITEM_GAP
@@ -1088,11 +1088,11 @@ function Pages:Create(parent)
         local description = resolve(option.description, page, option) or ""
         local disabled = resolve(option.disabled, page, option) and true or false
 
-        item.Label:SetWidth(width - 52)
+        item.Label:SetWidth(width - 46)
         item.Label:SetText(label)
         item.Label:SetTextColor(Theme.colors.text[1], Theme.colors.text[2], Theme.colors.text[3], disabled and 0.45 or 1)
 
-        item.Description:SetWidth(width - 52)
+        item.Description:SetWidth(width - 46)
         item.Description:SetText(description)
         item.Description:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], disabled and 0.45 or 1)
         if description ~= "" then
@@ -1156,7 +1156,7 @@ function Pages:Create(parent)
         if description ~= "" then
           height = height + item.Description:GetStringHeight() + 2
         end
-        height = math.max(44, height + 18)
+        height = math.max(36, height + 12)
         item.Check:ClearAllPoints()
         item.Check:SetPoint("TOPRIGHT", item, "TOPRIGHT", 0, -math.floor((height - item.Check:GetHeight()) / 2))
         item:SetHeight(height)
@@ -1173,7 +1173,7 @@ function Pages:Create(parent)
         local buttonWidth = tonumber(resolve(option.buttonWidth, page, option)) or 150
         local disabled = resolve(option.disabled, page, option) and true or false
         item.Button:SetWidth(buttonWidth)
-        item.Label:SetWidth(math.max(80, width - buttonWidth - 20))
+        item.Label:SetWidth(math.max(80, width - buttonWidth - 16))
         item.Label:SetText(label)
         item.Label:SetTextColor(Theme.colors.text[1], Theme.colors.text[2], Theme.colors.text[3], disabled and 0.45 or 1)
         item.Button:SetText(resolve(option.buttonText, page, option) or label or "Run")
@@ -1194,7 +1194,7 @@ function Pages:Create(parent)
 
         item.Description:ClearAllPoints()
         item.Description:SetPoint("TOPLEFT", item.Label, "BOTTOMLEFT", 0, -2)
-        item.Description:SetWidth(math.max(80, width - buttonWidth - 20))
+        item.Description:SetWidth(math.max(80, width - buttonWidth - 16))
         local description = resolve(option.description, page, option) or ""
         item.Description:SetText(description)
         item.Description:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], disabled and 0.45 or Theme.colors.muted[4])
@@ -1208,7 +1208,7 @@ function Pages:Create(parent)
         if description ~= "" then
           height = height + item.Description:GetStringHeight() + 2
         end
-        height = math.max(50, height + 18)
+        height = math.max(38, height + 12)
         item.Button:ClearAllPoints()
         item.Button:SetPoint("RIGHT", item, "RIGHT", 0, 0)
         item:SetHeight(height)
@@ -1242,10 +1242,10 @@ function Pages:Create(parent)
           end
         end
 
-        item.Label:SetWidth(math.max(80, width - buttonWidth - 20))
+        item.Label:SetWidth(math.max(80, width - buttonWidth - 16))
         item.Label:SetText(label)
         item.Label:SetTextColor(Theme.colors.text[1], Theme.colors.text[2], Theme.colors.text[3], disabled and 0.45 or 1)
-        item.Description:SetWidth(math.max(80, width - buttonWidth - 20))
+        item.Description:SetWidth(math.max(80, width - buttonWidth - 16))
         item.Description:SetText(description)
         item.Description:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], disabled and 0.45 or 1)
         if description ~= "" then
@@ -1285,7 +1285,7 @@ function Pages:Create(parent)
         if description ~= "" then
           height = height + item.Description:GetStringHeight() + 2
         end
-        height = math.max(50, height + 18)
+        height = math.max(38, height + 12)
         item.SelectButton:ClearAllPoints()
         item.SelectButton:SetPoint("RIGHT", item, "RIGHT", 0, 0)
         item:SetHeight(height)
@@ -1328,8 +1328,8 @@ function Pages:Create(parent)
         end
 
         item.ValueShell:ClearAllPoints()
-        item.ValueShell:SetPoint("TOPLEFT", item, "TOPLEFT", 0, contentY - 4)
-        item.ValueShell:SetPoint("TOPRIGHT", item, "TOPRIGHT", 0, contentY - 4)
+        item.ValueShell:SetPoint("TOPLEFT", item, "TOPLEFT", 0, contentY - 3)
+        item.ValueShell:SetPoint("TOPRIGHT", item, "TOPRIGHT", 0, contentY - 3)
         item.Value:SetText("Current Binding: " .. formatBindingLabel(currentBinding))
         item.Value:SetTextColor(Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3], 0.95)
 
@@ -1363,8 +1363,8 @@ function Pages:Create(parent)
           end
         end)
 
-        local valueTop = contentY - 4
-        local height = math.abs(valueTop) + item.ValueShell:GetHeight() + 4 + item.SetButton:GetHeight()
+        local valueTop = contentY - 3
+        local height = math.abs(valueTop) + item.ValueShell:GetHeight() + 3 + item.SetButton:GetHeight()
         item:SetHeight(height)
         y = y - height - ITEM_GAP
       elseif optionType == "segmented" then
@@ -1406,8 +1406,8 @@ function Pages:Create(parent)
           contentY = contentY - item.Description:GetStringHeight() - 2
         end
 
-        local buttonGap = 6
-        local buttonTop = contentY - 6
+        local buttonGap = 4
+        local buttonTop = contentY - 4
         local choiceCount = #choices
         local buttonWidth = choiceCount > 0 and math.floor((width - (buttonGap * (choiceCount - 1))) / choiceCount) or width
         for choiceIndex = 1, choiceCount do
@@ -1453,7 +1453,7 @@ function Pages:Create(parent)
           item.Buttons[choiceIndex]:Hide()
         end
 
-        local height = math.abs(buttonTop) + 22
+        local height = math.abs(buttonTop) + 20
         item:SetHeight(height)
         y = y - height - ITEM_GAP
       elseif optionType == "blacklist" then
@@ -1488,8 +1488,8 @@ function Pages:Create(parent)
           contentY = contentY - item.Description:GetStringHeight() - 2
         end
         item.DropBox:ClearAllPoints()
-        item.DropBox:SetPoint("TOPLEFT", item, "TOPLEFT", 0, contentY - 4)
-        item.DropBox:SetPoint("TOPRIGHT", item, "TOPRIGHT", 0, contentY - 4)
+        item.DropBox:SetPoint("TOPLEFT", item, "TOPLEFT", 0, contentY - 3)
+        item.DropBox:SetPoint("TOPRIGHT", item, "TOPRIGHT", 0, contentY - 3)
         item.DropText:SetText("Drag an item here to blacklist it")
         item.DropText:SetTextColor(Theme.colors.text[1], Theme.colors.text[2], Theme.colors.text[3], Theme.colors.text[4])
         item.DropBox:SetScript("OnReceiveDrag", function()
@@ -1525,7 +1525,7 @@ function Pages:Create(parent)
         end)
 
         item.ClearButton:ClearAllPoints()
-        item.ClearButton:SetPoint("TOPRIGHT", item.DropBox, "BOTTOMRIGHT", 0, -5)
+        item.ClearButton:SetPoint("TOPRIGHT", item.DropBox, "BOTTOMRIGHT", 0, -4)
         if #entries > 0 then
           item.ClearButton:Enable()
         else
@@ -1541,13 +1541,13 @@ function Pages:Create(parent)
           end
         end)
 
-        local clearTop = contentY - 35
-        local listY = clearTop - 25
+        local clearTop = contentY - 31
+        local listY = clearTop - 23
         if #entries == 0 then
           item.Empty:Show()
           item.Empty:SetText("No blacklisted items.")
           item.Empty:ClearAllPoints()
-          item.Empty:SetPoint("TOPLEFT", item, "TOPLEFT", 0, clearTop - 4)
+          item.Empty:SetPoint("TOPLEFT", item, "TOPLEFT", 0, clearTop - 3)
           for rowIndex = 1, #item.rows do
             item.rows[rowIndex]:Hide()
           end
@@ -1570,7 +1570,7 @@ function Pages:Create(parent)
                 self.onChanged()
               end
             end)
-            listY = listY - 24
+            listY = listY - 22
           end
           for rowIndex = #entries + 1, #item.rows do
             item.rows[rowIndex]:Hide()
@@ -1581,7 +1581,7 @@ function Pages:Create(parent)
         if #entries > 0 then
           height = math.abs(listY) + 2
         else
-          height = math.abs(clearTop) + 20
+          height = math.abs(clearTop) + 18
         end
         item:SetHeight(height)
         y = y - height - ITEM_GAP
@@ -1593,11 +1593,11 @@ function Pages:Create(parent)
         item:SetWidth(width)
         item:SetHeight(1)
         item:Show()
-        y = y - 8
+        y = y - 6
       end
     end
 
-    self.Child:SetHeight(math.abs(y) + 18)
+    self.Child:SetHeight(math.abs(y) + 12)
     self.Scroll:SetVerticalScroll(math.max(0, targetScroll))
   end
 

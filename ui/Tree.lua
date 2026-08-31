@@ -6,11 +6,11 @@ local Theme = AP.UI.Theme
 local Tree = {}
 AP.UI.Tree = Tree
 
-local ROOT_ROW_HEIGHT = 28
-local CHILD_ROW_HEIGHT = 25
-local ROOT_GAP = 4
-local INDENT_WIDTH = 14
-local NAV_GUTTER = 12
+local ROOT_ROW_HEIGHT = 25
+local CHILD_ROW_HEIGHT = 22
+local ROOT_GAP = 2
+local INDENT_WIDTH = 12
+local NAV_GUTTER = 8
 
 local function updateScrollChildWidth(scrollFrame, child)
   local width = scrollFrame:GetWidth() or 0
@@ -36,30 +36,30 @@ function Tree:Create(parent)
   Theme:ApplyBackdrop(frame, Theme.colors.sidebar or Theme.colors.inset, Theme.colors.border)
 
   frame.Title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  frame.Title:SetPoint("TOPLEFT", frame, "TOPLEFT", NAV_GUTTER, -9)
+  frame.Title:SetPoint("TOPLEFT", frame, "TOPLEFT", NAV_GUTTER, -7)
   frame.Title:SetText("WORKSPACE")
   frame.Title:SetTextColor(Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3], Theme.colors.gold[4])
 
   frame.Divider = frame:CreateTexture(nil, "ARTWORK")
-  frame.Divider:SetPoint("TOPLEFT", frame, "TOPLEFT", NAV_GUTTER, -27)
-  frame.Divider:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -NAV_GUTTER, -27)
+  frame.Divider:SetPoint("TOPLEFT", frame, "TOPLEFT", NAV_GUTTER, -23)
+  frame.Divider:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -NAV_GUTTER, -23)
   frame.Divider:SetHeight(1)
   Theme:Paint(frame.Divider, Theme.colors.line)
 
   frame.Scroll = CreateFrame("ScrollFrame", "LevoTreeScroll", frame, "UIPanelScrollFrameTemplate")
-  frame.Scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", NAV_GUTTER, -33)
-  frame.Scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -29, NAV_GUTTER)
+  frame.Scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", NAV_GUTTER, -29)
+  frame.Scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -25, NAV_GUTTER)
   Theme:SkinScrollFrame(frame.Scroll)
   frame.Scroll:EnableMouseWheel(true)
   frame.Scroll:SetScript("OnMouseWheel", function(self, delta)
     local range = self:GetVerticalScrollRange() or 0
-    local nextValue = (self:GetVerticalScroll() or 0) - (delta * 24)
+    local nextValue = (self:GetVerticalScroll() or 0) - (delta * 20)
     nextValue = AP.Utils.Clamp(nextValue, 0, range)
     self:SetVerticalScroll(nextValue)
   end)
 
   frame.Child = CreateFrame("Frame", nil, frame.Scroll)
-  frame.Child:SetWidth(220)
+  frame.Child:SetWidth(208)
   frame.Child:SetHeight(1)
   frame.Scroll:SetScrollChild(frame.Child)
 
@@ -86,12 +86,12 @@ function Tree:Create(parent)
     row.APRowAccent:SetWidth(3)
 
     row.Toggle = CreateFrame("Button", nil, row)
-    row.Toggle:SetWidth(24)
-    row.Toggle:SetHeight(24)
+    row.Toggle:SetWidth(20)
+    row.Toggle:SetHeight(20)
 
     row.Toggle.Hover = row.Toggle:CreateTexture(nil, "HIGHLIGHT")
-    row.Toggle.Hover:SetPoint("TOPLEFT", row.Toggle, "TOPLEFT", 3, -3)
-    row.Toggle.Hover:SetPoint("BOTTOMRIGHT", row.Toggle, "BOTTOMRIGHT", -3, 3)
+    row.Toggle.Hover:SetPoint("TOPLEFT", row.Toggle, "TOPLEFT", 2, -2)
+    row.Toggle.Hover:SetPoint("BOTTOMRIGHT", row.Toggle, "BOTTOMRIGHT", -2, 2)
     Theme:Paint(row.Toggle.Hover, { Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3], 0.10 })
 
     row.Toggle.Glyph = row.Toggle:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
@@ -100,11 +100,11 @@ function Tree:Create(parent)
 
     row.Label = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     row.Label:SetJustifyH("LEFT")
-    row.Label:SetPoint("RIGHT", row, "RIGHT", -8, 0)
+    row.Label:SetPoint("RIGHT", row, "RIGHT", -6, 0)
 
     row.RootRule = row:CreateTexture(nil, "ARTWORK")
-    row.RootRule:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 8, 0)
-    row.RootRule:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -8, 0)
+    row.RootRule:SetPoint("BOTTOMLEFT", row, "BOTTOMLEFT", 6, 0)
+    row.RootRule:SetPoint("BOTTOMRIGHT", row, "BOTTOMRIGHT", -6, 0)
     row.RootRule:SetHeight(1)
     Theme:Paint(row.RootRule, { Theme.colors.border[1], Theme.colors.border[2], Theme.colors.border[3], 0.14 })
     row.RootRule:Hide()
@@ -139,7 +139,7 @@ function Tree:Create(parent)
 
     updateScrollChildWidth(self.Scroll, self.Child)
 
-    local y = -2
+    local y = -1
     for index = 1, #self.nodes do
       local node = self.nodes[index]
       local row = self:AcquireRow(index)
@@ -160,7 +160,7 @@ function Tree:Create(parent)
       row:Show()
 
       row.Toggle:ClearAllPoints()
-      row.Toggle:SetPoint("LEFT", row, "LEFT", 2 + (node.depth * INDENT_WIDTH), 0)
+      row.Toggle:SetPoint("LEFT", row, "LEFT", 1 + (node.depth * INDENT_WIDTH), 0)
 
       if node.hasChildren then
         row.Toggle:Show()
@@ -172,13 +172,13 @@ function Tree:Create(parent)
 
       row.Label:ClearAllPoints()
       if node.isRoot then
-        row.Label:SetPoint("LEFT", row, "LEFT", 32, 0)
+        row.Label:SetPoint("LEFT", row, "LEFT", 26, 0)
       elseif node.hasChildren then
-        row.Label:SetPoint("LEFT", row.Toggle, "RIGHT", 4, 0)
+        row.Label:SetPoint("LEFT", row.Toggle, "RIGHT", 2, 0)
       else
-        row.Label:SetPoint("LEFT", row, "LEFT", 30 + (node.depth * INDENT_WIDTH), 0)
+        row.Label:SetPoint("LEFT", row, "LEFT", 24 + (node.depth * INDENT_WIDTH), 0)
       end
-      row.Label:SetPoint("RIGHT", row, "RIGHT", -8, 0)
+      row.Label:SetPoint("RIGHT", row, "RIGHT", -6, 0)
       if row.Label.SetFontObject then
         row.Label:SetFontObject(node.isRoot and GameFontNormal or GameFontHighlightSmall)
       end
@@ -234,7 +234,7 @@ function Tree:Create(parent)
       self.rows[index]:Hide()
     end
 
-    self.Child:SetHeight(math.max(1, math.abs(y) + 2))
+    self.Child:SetHeight(math.max(1, math.abs(y) + 1))
     self:ScrollToNode(selectedId)
   end
 
