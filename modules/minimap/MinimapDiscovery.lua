@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.WotLKPlus or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Discovery = {}
 AP.MinimapPaletteDiscovery = Discovery
@@ -18,8 +18,8 @@ local EXCLUDED_BUTTONS = {
   QueueStatusMinimapButton = true,
   MiniMapLFGFrame = true,
   MiniMapMeetingStoneFrame = true,
-  WotLKPlusMinimapPaletteButton = true,
-  LibDBIcon10_WotLKPlus = true,
+  LevoMinimapPaletteButton = true,
+  LibDBIcon10_Levo = true,
 }
 
 local function call(frame, method, ...)
@@ -75,32 +75,48 @@ local function getLabel(frame, name)
 end
 
 local function getIcon(frame)
-  -- LDB and most minimap addons keep their real art in icon/Icon; normal textures
-  -- are frequently decorative rings, backgrounds, or highlight layers.
-  local normal = frame.icon or frame.Icon or call(frame, "GetNormalTexture")
-  local texture
-  local coords
-  if type(normal) == "string" then
-    texture = normal
-  elseif normal then
-    texture = call(normal, "GetTexture")
-    local left, right, top, bottom = call(normal, "GetTexCoord")
-    if left and right and top and bottom then
-      local horizontalInset = (right - left) * 0.04
-      local verticalInset = (bottom - top) * 0.04
-      coords = {
-        left + horizontalInset,
-        right - horizontalInset,
-        top + verticalInset,
-        bottom - verticalInset,
-      }
+  -- Prefer the addon's data-object or live icon region. Normal textures are often
+  -- decorative minimap rings, so use them only as a final compatibility fallback.
+  local data = frame.dataObject or frame.object or frame.data
+  local candidates = {}
+  local function addCandidate(candidate)
+    if candidate ~= nil then
+      candidates[#candidates + 1] = candidate
     end
   end
+  addCandidate(type(data) == "table" and (data.icon or data.Icon) or nil)
+  addCandidate(frame.icon)
+  addCandidate(frame.Icon)
+  addCandidate(frame.texture)
+  addCandidate(frame.Texture)
+  addCandidate(call(frame, "GetNormalTexture"))
 
-  if not texture and type(frame.icon) == "string" then
-    texture = frame.icon
+  for index = 1, #candidates do
+    local candidate = candidates[index]
+    local texture
+    local coords
+    if type(candidate) == "string" or type(candidate) == "number" then
+      texture = candidate
+      coords = { 0.04, 0.96, 0.04, 0.96 }
+    elseif candidate then
+      texture = call(candidate, "GetTexture")
+      local left, right, top, bottom = call(candidate, "GetTexCoord")
+      if left and right and top and bottom then
+        local horizontalInset = (right - left) * 0.04
+        local verticalInset = (bottom - top) * 0.04
+        coords = {
+          left + horizontalInset,
+          right - horizontalInset,
+          top + verticalInset,
+          bottom - verticalInset,
+        }
+      end
+    end
+    if texture then
+      return texture, coords
+    end
   end
-  return texture or "Interface\\Icons\\INV_Misc_QuestionMark", coords
+  return "Interface\\Icons\\INV_Misc_QuestionMark", nil
 end
 
 local function isProtected(frame)

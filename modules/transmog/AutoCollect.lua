@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Collector = {
   moduleEnabled = false,
@@ -322,7 +322,7 @@ function Collector:EnsureBindingButton()
     return
   end
 
-  local button = CreateFrame("Button", "AscensionPlusTransmogBindingButton", UIParent)
+  local button = CreateFrame("Button", "LevoTransmogBindingButton", UIParent)
   button:SetWidth(1)
   button:SetHeight(1)
   button:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -200, -200)

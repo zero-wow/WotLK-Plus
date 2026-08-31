@@ -170,4 +170,13 @@ assertEqual(cursor, nil, "physical container swap restores displaced cursor item
 local afterMatches = provider:OperationMatches("inventory", operation, "after")
 assertEqual(afterMatches, true, "bound physical locations match after state")
 
+values.banking.sorter.qualityRules = {
+  legendary = { mode = "ignore" },
+}
+items[200].quality = 5
+snapshot = assert(provider:TakeSnapshot())
+assertEqual(snapshot.slotCount, 1, "ignored quality slots should be absent from the planner snapshot")
+assertEqual(snapshot.excludedQualities, 1, "ignored quality slot count")
+assertEqual(snapshot.locations[1].slotID, 1, "remaining movable slot should preserve its physical location")
+
 io.write("PASS exclusions stay outside the plan and bound physical container swaps confirm\n")

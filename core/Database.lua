@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Database = {
   ready = false,
@@ -47,6 +47,7 @@ AP.defaults = AP.defaults or {
     transmog = true,
     destroyConfirm = true,
     minimapPalette = true,
+    talentImport = true,
   },
   skillCards = {
     migrationVersion = 0,
@@ -73,6 +74,16 @@ AP.defaults = AP.defaults or {
       preferNativeAnchor = true,
       conservativePacing = false,
       showChatMessages = true,
+      qualityRules = {
+        poor = { mode = "normal", inventoryDestination = "any", characterDestination = "any" },
+        common = { mode = "normal", inventoryDestination = "any", characterDestination = "any" },
+        uncommon = { mode = "normal", inventoryDestination = "any", characterDestination = "any" },
+        rare = { mode = "normal", inventoryDestination = "any", characterDestination = "any" },
+        epic = { mode = "normal", inventoryDestination = "any", characterDestination = "any" },
+        legendary = { mode = "normal", inventoryDestination = "any", characterDestination = "any" },
+        artifact = { mode = "normal", inventoryDestination = "any", characterDestination = "any" },
+        heirloom = { mode = "normal", inventoryDestination = "any", characterDestination = "any" },
+      },
       exclusions = {
         items = {},
         bags = {
@@ -253,6 +264,11 @@ AP.defaults = AP.defaults or {
       autoFillDelete = true,
     },
   },
+  talentImport = {
+    showButton = true,
+    showTooltips = true,
+    lastBuild = "",
+  },
   transmog = {
     autoCollect = {
       enabled = false,
@@ -321,8 +337,8 @@ function Database:Initialize()
     return
   end
 
-  if type(WotLKPlusDB) ~= "table" then
-    WotLKPlusDB = {}
+  if type(LevoDB) ~= "table" then
+    LevoDB = {}
   end
 
   local function copyMissing(target, source)
@@ -335,14 +351,18 @@ function Database:Initialize()
     end
   end
 
-  -- The renamed addon adopts existing Ascension Plus settings without sharing
-  -- a SavedVariables name with a legacy installation.
+  -- Levo adopts prior settings once, then keeps only its own SavedVariables root.
+  if type(WotLKPlusDB) == "table" then
+    copyMissing(LevoDB, WotLKPlusDB)
+  end
   if type(AscensionPlusDB) == "table" then
-    copyMissing(WotLKPlusDB, AscensionPlusDB)
+    copyMissing(LevoDB, AscensionPlusDB)
   end
 
-  self.db = AP.Utils.MergeDefaults(WotLKPlusDB, AP.defaults)
-  WotLKPlusDB = self.db
+  self.db = AP.Utils.MergeDefaults(LevoDB, AP.defaults)
+  LevoDB = self.db
+  WotLKPlusDB = nil
+  AscensionPlusDB = nil
   self.ready = true
 end
 

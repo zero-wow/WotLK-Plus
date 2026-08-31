@@ -1,10 +1,10 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Banking = AP.Banking
 local Theme = AP.UI.Theme
 local Sorter = Banking.Sorter
-local ICON = "Interface\\AddOns\\WotLK-Plus\\media\\banking\\sort"
+local ICON = "Interface\\AddOns\\Levo\\media\\banking\\sort"
 
 local SortButton = {
   frames = {},
@@ -30,7 +30,7 @@ function SortButton:Create(contextID)
   end
 
   local safeID = tostring(contextID):gsub("[^%w]", "")
-  frame = CreateFrame("Button", "WotLKPlusSortButton" .. safeID, UIParent)
+  frame = CreateFrame("Button", "LevoSortButton" .. safeID, UIParent)
   frame:SetWidth(22)
   frame:SetHeight(22)
   frame:SetClampedToScreen(true)
@@ -73,14 +73,14 @@ function SortButton:Create(contextID)
     local activeHere = Sorter:IsRunning() and Sorter.provider and Sorter.provider.id == button.contextID
     setBorder(button, activeHere and Theme.colors.orange or Theme.colors.gold)
     GameTooltip:SetOwner(button, "ANCHOR_RIGHT")
-    GameTooltip:AddLine("WOTLK PLUS SORT", Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3])
+    GameTooltip:AddLine("LEVO SORT", Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3])
     GameTooltip:AddLine(contextTitle(button.contextID), Theme.colors.text[1], Theme.colors.text[2], Theme.colors.text[3])
     GameTooltip:AddLine(Sorter:GetStatusText(), Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], true)
     GameTooltip:AddLine(" ")
     if activeHere then
       GameTooltip:AddLine("Click to cancel after the active move confirms.", Theme.colors.orange[1], Theme.colors.orange[2], Theme.colors.orange[3], true)
     elseif Sorter:IsRunning() then
-      GameTooltip:AddLine("Another WotLK Plus sort is already running.", Theme.colors.red[1], Theme.colors.red[2], Theme.colors.red[3], true)
+      GameTooltip:AddLine("Another Levo sort is already running.", Theme.colors.red[1], Theme.colors.red[2], Theme.colors.red[3], true)
     else
       local available, reason = Sorter:GetAvailability(button.contextID)
       if available then

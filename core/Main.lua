@@ -1,16 +1,18 @@
 local ADDON_NAME, AP = ...
-ADDON_NAME = type(ADDON_NAME) == "string" and ADDON_NAME or "WotLK-Plus"
+ADDON_NAME = type(ADDON_NAME) == "string" and ADDON_NAME or "Levo"
 
 if type(AP) ~= "table" then
-  AP = type(_G.WotLKPlus) == "table" and _G.WotLKPlus
-    or (type(_G.AscensionPlus) == "table" and _G.AscensionPlus or {})
+  AP = type(_G.Levo) == "table" and _G.Levo
+    or (type(_G.WotLKPlus) == "table" and _G.WotLKPlus
+      or (type(_G.AscensionPlus) == "table" and _G.AscensionPlus or {}))
 end
+_G.Levo = AP
 _G.WotLKPlus = AP
 -- Keep the former namespace alive for existing internal modules and saved UI callbacks.
 _G.AscensionPlus = AP
 
 AP.name = ADDON_NAME
-AP.prettyName = "WotLK Plus"
+AP.prettyName = "Levo"
 AP.version = (GetAddOnMetadata and GetAddOnMetadata(ADDON_NAME, "Version")) or "0.8.0"
 AP.modules = AP.modules or {}
 AP.UI = AP.UI or AP.ui or {}
@@ -26,7 +28,7 @@ AP.loadState.initialized = false
 AP.loadState.initializationError = nil
 
 function AP:Print(message)
-  local formatted = "|cffe7c56d[WP]|r " .. tostring(message or "")
+  local formatted = "|cffe7c56d[LV]|r " .. tostring(message or "")
   if DEFAULT_CHAT_FRAME and DEFAULT_CHAT_FRAME.AddMessage then
     DEFAULT_CHAT_FRAME:AddMessage(formatted)
   elseif print then
@@ -46,7 +48,7 @@ function AP:TryInitialize(reason)
       message = message .. " (trigger: " .. tostring(reason) .. ")"
     end
     self.loadState.initializationError = message
-    self:Print("|cffff6666" .. message .. ".|r Use /wp status for diagnostics.")
+    self:Print("|cffff6666" .. message .. ".|r Use /lv status for diagnostics.")
     return false, message
   end
 
@@ -101,10 +103,10 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         showMessage = AP.Database:Get("general.showStartupMessage", true)
       end
       if showMessage then
-        AP:Print(string.format("%s v%s loaded. Type |cff93c2ff/wp|r for help or |cff93c2ff/wpc|r for configuration.", AP.prettyName, AP.version))
+        AP:Print(string.format("%s v%s loaded. Type |cff93c2ff/lv|r for help or |cff93c2ff/lvc|r for configuration.", AP.prettyName, AP.version))
       end
     else
-      AP:Print("|cffff6666Core loaded, but startup did not complete.|r Type /wp status for the captured error.")
+      AP:Print("|cffff6666Core loaded, but startup did not complete.|r Type /lv status for the captured error.")
     end
 
     self:UnregisterEvent("PLAYER_LOGIN")

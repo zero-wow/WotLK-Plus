@@ -1,13 +1,13 @@
 local root = (... and ... ~= "" and ...) or "."
 
 _G.AscensionPlus = {}
-_G.WotLKPlus = _G.AscensionPlus
-_G.WotLKPlusDB = {
+_G.Levo = _G.AscensionPlus
+_G.LevoDB = {
   interface = {
     searchHints = false,
   },
 }
-_G.AscensionPlusDB = {
+_G.WotLKPlusDB = {
   general = {
     showStartupMessage = false,
   },
@@ -25,13 +25,14 @@ _G.AscensionPlusDB = {
 dofile(root .. "/core/Utils.lua")
 dofile(root .. "/core/Database.lua")
 
-local Database = _G.WotLKPlus.Database
+local Database = _G.Levo.Database
 Database:Initialize()
 
 assert(Database:Get("general.showStartupMessage") == false, "legacy general settings must migrate")
 assert(Database:Get("interface.restoreLastPage") == false, "missing nested settings must migrate")
-assert(Database:Get("interface.searchHints") == false, "existing WotLK Plus settings must win")
+assert(Database:Get("interface.searchHints") == false, "existing Levo settings must win")
 assert(Database:Get("banking.sorter.enabled") == false, "legacy banking settings must migrate")
-assert(_G.WotLKPlusDB == Database.db, "the new SavedVariables table must own the resolved database")
+assert(_G.LevoDB == Database.db, "the new SavedVariables table must own the resolved database")
+assert(_G.WotLKPlusDB == nil and _G.AscensionPlusDB == nil, "legacy SavedVariables globals must be released after migration")
 
 print("DatabaseMigrationSpec: OK")

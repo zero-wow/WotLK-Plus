@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 if not AP then
   return
@@ -796,7 +796,7 @@ function Window:Initialize()
     return
   end
 
-  local frame = CreateFrame("Frame", "AscensionPlusSkillCardLedger", UIParent)
+  local frame = CreateFrame("Frame", "LevoSkillCardLedger", UIParent)
   frame:SetFrameStrata("DIALOG")
   frame:SetToplevel(true)
   frame:EnableMouse(true)
@@ -827,7 +827,7 @@ function Window:Initialize()
     saveWindowState(self)
   end)
 
-  local escapeProxy = CreateFrame("Frame", "AscensionPlusSkillCardEscapeProxy", UIParent)
+  local escapeProxy = CreateFrame("Frame", "LevoSkillCardEscapeProxy", UIParent)
   escapeProxy:SetWidth(1)
   escapeProxy:SetHeight(1)
   escapeProxy:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -2, 2)
@@ -839,7 +839,7 @@ function Window:Initialize()
   escapeProxy:Hide()
   self.escapeProxy = escapeProxy
   if UISpecialFrames then
-    table.insert(UISpecialFrames, "AscensionPlusSkillCardEscapeProxy")
+    table.insert(UISpecialFrames, "LevoSkillCardEscapeProxy")
   end
 
   frame.Header = frame:CreateTexture(nil, "BACKGROUND")
@@ -951,7 +951,7 @@ function Window:Initialize()
 
   frame.CardShell = CreateFrame("Frame", nil, frame)
   Theme:ApplyBackdrop(frame.CardShell, Theme.colors.inset, Theme.colors.neutralLine or Theme.colors.line)
-  frame.CardScroll = CreateFrame("ScrollFrame", "AscensionPlusSkillCardScroll", frame.CardShell, "UIPanelScrollFrameTemplate")
+  frame.CardScroll = CreateFrame("ScrollFrame", "LevoSkillCardScroll", frame.CardShell, "UIPanelScrollFrameTemplate")
   frame.CardScroll:SetPoint("TOPLEFT", frame.CardShell, "TOPLEFT", 2, -2)
   frame.CardScroll:SetPoint("BOTTOMRIGHT", frame.CardShell, "BOTTOMRIGHT", -20, 2)
   Theme:SkinScrollFrame(frame.CardScroll)
@@ -965,7 +965,7 @@ function Window:Initialize()
   frame.CardChild:SetHeight(1)
   frame.CardScroll:SetScrollChild(frame.CardChild)
 
-  frame.CombatOverlay = CreateFrame("Frame", "AscensionPlusSkillCardCombatOverlay", UIParent)
+  frame.CombatOverlay = CreateFrame("Frame", "LevoSkillCardCombatOverlay", UIParent)
   frame.CombatOverlay:SetPoint("TOPLEFT", frame.CardShell, "TOPLEFT", 0, 0)
   frame.CombatOverlay:SetPoint("BOTTOMRIGHT", frame.CardShell, "BOTTOMRIGHT", 0, 0)
   frame.CombatOverlay:SetFrameStrata("DIALOG")
@@ -1173,7 +1173,7 @@ end
 
 function Window:ShowToast(message)
   if not self.toast then
-    local toast = CreateFrame("Button", "AscensionPlusSkillCardToast", UIParent)
+    local toast = CreateFrame("Button", "LevoSkillCardToast", UIParent)
     toast:SetFrameStrata("DIALOG")
     toast:SetWidth(320)
     toast:SetHeight(54)

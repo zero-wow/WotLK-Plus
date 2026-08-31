@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Theme = AP.UI.Theme
 local Rules = AP.TransmogAppearanceRules
@@ -91,7 +91,7 @@ local function applyItemTooltip(frame)
     GameTooltip:SetHyperlink(entry.link)
   end
   GameTooltip:AddLine(" ")
-  GameTooltip:AddLine("WotLK Plus Appearance Review", Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3])
+  GameTooltip:AddLine("Levo Appearance Review", Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3])
   GameTooltip:AddLine("No binding occurs until you choose an action.", 1, 1, 1, true)
   GameTooltip:Show()
 end
@@ -102,7 +102,7 @@ function Prompt:EnsureFrame()
   end
 
   local layout = self.LAYOUT
-  local frame = CreateFrame("Frame", "AscensionPlusAppearancePrompt", UIParent)
+  local frame = CreateFrame("Frame", "LevoAppearancePrompt", UIParent)
   frame:SetWidth(layout.width)
   frame:SetHeight(layout.height)
   frame:SetPoint("CENTER", UIParent, "CENTER", 0, 28)

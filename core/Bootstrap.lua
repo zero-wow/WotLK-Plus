@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 function AP.RegisterCorePages()
   if AP._corePagesRegistered then
@@ -11,13 +11,13 @@ function AP.RegisterCorePages()
     id = "general",
     title = "Overview",
     order = 10,
-      description = "Live feature status and the fastest routes into WotLK Plus.",
+      description = "Live feature status and the fastest routes into Levo.",
       searchText = "overview general status modules slash commands help wp wpc ap apc config",
       options = function()
         local options = {
           {
             type = "status",
-            label = "WotLK Plus",
+            label = "Levo",
             value = "READY",
           color = "green",
           description = "Version " .. tostring(AP.version or "") .. " is initialized. Settings apply immediately.",
@@ -37,7 +37,7 @@ function AP.RegisterCorePages()
             type = "toggle",
             path = "general.showStartupMessage",
             label = "Show startup message on login",
-            description = "Print a small chat confirmation when WotLK Plus finishes loading.",
+            description = "Print a small chat confirmation when Levo finishes loading.",
           },
         }
 

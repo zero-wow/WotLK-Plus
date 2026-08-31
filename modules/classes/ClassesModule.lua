@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 if AP.Compatibility
   and type(AP.Compatibility.HasCustomClasses) == "function"
@@ -42,7 +42,7 @@ AP.Modules:Register("classes", {
         return {
           {
             type = "text",
-            text = "Select a class to review its specializations and available WotLK Plus features.",
+            text = "Select a class to review its specializations and available Levo features.",
           },
         }
       end,

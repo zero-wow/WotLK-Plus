@@ -1,10 +1,27 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Banking = AP.Banking
 local Exclusions = {}
 
 Banking.SorterExclusions = Exclusions
+
+local QUALITY_KEYS = {
+  [0] = "poor",
+  [1] = "common",
+  [2] = "uncommon",
+  [3] = "rare",
+  [4] = "epic",
+  [5] = "legendary",
+  [6] = "artifact",
+  [7] = "heirloom",
+}
+
+local VALID_QUALITY_MODES = {
+  normal = true,
+  ignore = true,
+  bottom = true,
+}
 
 local function normalizeItemID(itemID)
   itemID = tonumber(itemID)
@@ -55,6 +72,54 @@ end
 
 function Exclusions:ClearItems()
   AP.Database:Set("banking.sorter.exclusions.items", {})
+end
+
+function Exclusions:GetQualityKey(quality)
+  return QUALITY_KEYS[tonumber(quality) or -1]
+end
+
+function Exclusions:GetQualityRule(quality)
+  local key = self:GetQualityKey(quality)
+  if not key then
+    return {
+      key = "unknown",
+      mode = "normal",
+      inventoryDestination = "any",
+      characterDestination = "any",
+    }
+  end
+
+  local saved = AP.Database:Get("banking.sorter.qualityRules." .. key, {})
+  saved = type(saved) == "table" and saved or {}
+  local mode = VALID_QUALITY_MODES[saved.mode] and saved.mode or "normal"
+  return {
+    key = key,
+    mode = mode,
+    inventoryDestination = type(saved.inventoryDestination) == "string" and saved.inventoryDestination or "any",
+    characterDestination = type(saved.characterDestination) == "string" and saved.characterDestination or "any",
+  }
+end
+
+function Exclusions:IsQualityIgnored(quality)
+  return self:GetQualityRule(quality).mode == "ignore"
+end
+
+function Exclusions:GetPlanningRules(scope)
+  local rules = {}
+  for quality = 0, 7 do
+    local rule = self:GetQualityRule(quality)
+    local destination = "any"
+    if scope == "inventory" then
+      destination = rule.inventoryDestination
+    elseif scope == "character" then
+      destination = rule.characterDestination
+    end
+    rules[quality] = {
+      mode = rule.mode,
+      destination = destination,
+    }
+  end
+  return rules
 end
 
 function Exclusions:GetItemEntries()
@@ -117,7 +182,17 @@ function Exclusions:GetSignature(scope)
       end
     end
   end
+
+  for quality = 0, 7 do
+    local rule = self:GetQualityRule(quality)
+    local destination = "any"
+    if scope == "inventory" then
+      destination = rule.inventoryDestination
+    elseif scope == "character" then
+      destination = rule.characterDestination
+    end
+    parts[#parts + 1] = string.format("q%d:%s:%s", quality, rule.mode, destination)
+  end
   table.sort(parts)
   return table.concat(parts, ",")
 end
-

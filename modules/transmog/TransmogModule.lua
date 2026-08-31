@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 if AP.Compatibility
   and type(AP.Compatibility.HasAppearanceCollection) == "function"
@@ -67,7 +67,7 @@ AP.Modules:Register("transmog", {
           {
             type = "section",
             label = "Automatic appearance collection",
-            description = "WotLK Plus uses this server's runtime wardrobe API, scans only after loot/new-item signals, and routes each uncollected appearance through your NEVER, ASK, or AUTO rarity rule. Review alerts can stay active without allowing automatic binding.",
+            description = "Levo uses this server's runtime wardrobe API, scans only after loot/new-item signals, and routes each uncollected appearance through your NEVER, ASK, or AUTO rarity rule. Review alerts can stay active without allowing automatic binding.",
           },
           {
             type = "text",
@@ -139,7 +139,7 @@ AP.Modules:Register("transmog", {
       parent = "transmog",
       title = "Auto Collect",
       order = 10,
-      description = "Control when WotLK Plus ignores, asks about, or automatically learns carried appearances.",
+      description = "Control when Levo ignores, asks about, or automatically learns carried appearances.",
       searchText = "auto collect review alert popup hotkey keybind loot scan quality armor weapon runtime on off",
       options = function()
         local options = {

@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Theme = AP.UI.Theme
 
@@ -46,7 +46,7 @@ function Tree:Create(parent)
   frame.Divider:SetHeight(1)
   Theme:Paint(frame.Divider, Theme.colors.line)
 
-  frame.Scroll = CreateFrame("ScrollFrame", "WotLKPlusTreeScroll", frame, "UIPanelScrollFrameTemplate")
+  frame.Scroll = CreateFrame("ScrollFrame", "LevoTreeScroll", frame, "UIPanelScrollFrameTemplate")
   frame.Scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", NAV_GUTTER, -33)
   frame.Scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -29, NAV_GUTTER)
   Theme:SkinScrollFrame(frame.Scroll)

@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 if not AP then
   return
@@ -178,13 +178,13 @@ local function registerConfigPages()
         type = "toggle",
         path = "modules.skillCards",
         label = "Enable Skill Card Ledger",
-        description = "Enable inventory scans, contextual vendor behavior, loot notifications, and /wp cards.",
+        description = "Enable inventory scans, contextual vendor behavior, loot notifications, and /lv cards.",
         onChange = refreshModuleState,
       }
       options[#options + 1] = {
         type = "section",
         label = "Safety model",
-        description = "Ownership uncertainty always fails closed. WotLK Plus never clicks a global confirmation button; the native vendor confirmation remains your final commit.",
+        description = "Ownership uncertainty always fails closed. Levo never clicks a global confirmation button; the native vendor confirmation remains your final commit.",
       }
       return options
     end,
@@ -278,7 +278,7 @@ local function registerConfigPages()
         {
           type = "section",
           label = "Two confirmations, two jobs",
-          description = "When protection is intentionally disabled, WotLK Plus asks once per card group for the current session. The native exchange confirmation then remains visible and must still be accepted manually.",
+          description = "When protection is intentionally disabled, Levo asks once per card group for the current session. The native exchange confirmation then remains visible and must still be accepted manually.",
         },
       }
     end,

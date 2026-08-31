@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Theme = AP.UI.Theme
 local Collector = AP.TransmogAutoCollect
@@ -157,7 +157,7 @@ function Inbox:EnsureFrame()
   end
 
   local layout = self.LAYOUT
-  local frame = CreateFrame("Frame", "AscensionPlusAppearanceInbox", UIParent)
+  local frame = CreateFrame("Frame", "LevoAppearanceInbox", UIParent)
   frame:SetWidth(layout.width)
   frame:SetHeight(layout.height)
   frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
@@ -239,7 +239,7 @@ function Inbox:EnsureFrame()
   frame.ListShell:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -layout.horizontalInset, layout.listBottom)
   Theme:ApplyBackdrop(frame.ListShell, Theme.colors.inset, { Theme.colors.border[1], Theme.colors.border[2], Theme.colors.border[3], 0.35 })
 
-  frame.Scroll = CreateFrame("ScrollFrame", "AscensionPlusAppearanceInboxScroll", frame.ListShell, "UIPanelScrollFrameTemplate")
+  frame.Scroll = CreateFrame("ScrollFrame", "LevoAppearanceInboxScroll", frame.ListShell, "UIPanelScrollFrameTemplate")
   frame.Scroll:SetPoint("TOPLEFT", frame.ListShell, "TOPLEFT", 6, -6)
   frame.Scroll:SetPoint("BOTTOMRIGHT", frame.ListShell, "BOTTOMRIGHT", -24, 6)
   Theme:SkinScrollFrame(frame.Scroll)
@@ -524,7 +524,7 @@ function Inbox:ShowEntryTooltip(entry)
     GameTooltip:SetHyperlink(entry.link)
   end
   GameTooltip:AddLine(" ")
-  GameTooltip:AddLine("WotLK Plus", Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3])
+  GameTooltip:AddLine("Levo", Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3])
   GameTooltip:AddLine(entry.statusReason or "No status detail is available.", 1, 1, 1, true)
   GameTooltip:Show()
 end

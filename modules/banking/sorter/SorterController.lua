@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Banking = AP.Banking
 local Planner = Banking.SorterPlanner
@@ -232,11 +232,11 @@ function Sorter:GetAvailability(contextID)
   if not self.enabled then
     return false, "The banking module is disabled."
   elseif not AP.Database:Get("banking.sorter.enabled", true) then
-    return false, "Sorting is disabled in WotLK Plus configuration."
+    return false, "Sorting is disabled in Levo configuration."
   elseif inCombat() then
     return false, "Sorting is unavailable during combat."
   elseif Banking.Controller and Banking.Controller.processing then
-    return false, "Wait for the active WotLK Plus bank transfer to finish."
+    return false, "Wait for the active Levo bank transfer to finish."
   elseif not provider then
     return false, "No supported sorting context is available."
   elseif provider:HasCursorItem() then
@@ -387,19 +387,27 @@ function Sorter:Start(contextID)
   self.startedAt = now()
   self.nextActionAt = self.startedAt
   self.pacing = Pacing:Create(AP.Database:Get("banking.sorter.conservativePacing", false))
+  local excludedItemSlots = (snapshot.excludedItems or 0) + (snapshot.excludedQualities or 0)
+  local exclusionSummary = ""
+  if excludedItemSlots + (snapshot.excludedBags or 0) > 0 then
+    exclusionSummary = string.format(
+      "; %d protected/quality item slot%s and %d bag%s excluded",
+      excludedItemSlots,
+      excludedItemSlots == 1 and "" or "s",
+      snapshot.excludedBags or 0,
+      snapshot.excludedBags == 1 and "" or "s"
+    )
+  end
   self.running = true
   self:SetStatus(string.format(
-    "Sorting %s: %d consolidation + %d placement operations planned%s.",
+    "Sorting %s: %d consolidation + %d placement operations planned%s%s.",
     self.scopeLabel,
     plan.stats.stackMoves,
     plan.stats.sortMoves,
-    (snapshot.excludedItems or 0) + (snapshot.excludedBags or 0) > 0
-      and string.format("; %d item slot%s and %d bag%s excluded",
-        snapshot.excludedItems or 0,
-        snapshot.excludedItems == 1 and "" or "s",
-        snapshot.excludedBags or 0,
-        snapshot.excludedBags == 1 and "" or "s")
-      or ""
+    plan.stats.routedItems and plan.stats.routedItems > 0
+      and string.format("; dedicated quality routing applies to %d stack%s", plan.stats.routedItems, plan.stats.routedItems == 1 and "" or "s")
+      or "",
+    exclusionSummary
   ), false, true)
   self:Print(self.lastStatus)
   self:Wake()
@@ -757,7 +765,7 @@ function Sorter:HandleSlash(arguments)
   elseif command == "keeper" or command == "realm" or command == "personal" then
     return self:Start("keeper")
   elseif command == "cancel" or command == "stop" then
-    return self:Cancel("Sorting cancelled from /wp sort.")
+    return self:Cancel("Sorting cancelled from /lv sort.")
   elseif command == "status" then
     self:Print(self:GetStatusText())
     return true
@@ -768,6 +776,6 @@ function Sorter:HandleSlash(arguments)
     end
   end
 
-  self:Print("Usage: |cff93c2ff/wp sort|r [inventory|bank|keeper], |cff93c2ff/wp sort status|r, |cff93c2ff/wp sort cancel|r, or |cff93c2ff/wp sort config|r.")
+  self:Print("Usage: |cff93c2ff/lv sort|r [inventory|bank|keeper], |cff93c2ff/lv sort status|r, |cff93c2ff/lv sort cancel|r, or |cff93c2ff/lv sort config|r.")
   return false, "usage"
 end

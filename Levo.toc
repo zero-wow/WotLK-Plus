@@ -1,10 +1,10 @@
 ## Interface: 30300
-## Title: WotLK Plus
-## Notes: WotLK 3.3.5 quality-of-life, banking, sorting, and interface tools. Ascension extensions activate only when their APIs are present.
+## Title: Levo
+## Notes: Facilitas for WotLK 3.3.5: quality-of-life, banking, sorting, and interface tools. Ascension extensions activate only when their APIs are present.
 ## Author: Codex
-## Version: 0.15.0
+## Version: 0.16.0
 ## OptionalDeps: ChocolateBar, ElvUI, Bagnon, AdiBags, AscendedSkillCards
-## SavedVariables: WotLKPlusDB, AscensionPlusDB
+## SavedVariables: LevoDB, WotLKPlusDB, AscensionPlusDB
 
 # Keep the bootstrap and slash registrar first so commands survive feature errors.
 core\Main.lua
@@ -45,6 +45,13 @@ modules\skillcards\SkillCardsModule.lua
 
 # Class Library (Ascension extension)
 modules\classes\ClassesModule.lua
+
+# Talent import (Ascension extension with a reusable build parser and planner)
+modules\talents\BuildParser.lua
+modules\talents\BuildPlanner.lua
+modules\talents\AscensionAdapter.lua
+modules\talents\ImportWindow.lua
+modules\talents\TalentImportModule.lua
 
 # Quality-of-life modules
 modules\qol\QoLModule.lua

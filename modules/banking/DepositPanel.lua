@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Banking = AP.Banking
 local Categories = Banking.Categories
@@ -24,7 +24,7 @@ Panel.LAYOUT = {
 
 Banking.Panel = Panel
 
-local MEDIA = "Interface\\AddOns\\WotLK-Plus\\media\\banking\\"
+local MEDIA = "Interface\\AddOns\\Levo\\media\\banking\\"
 local BUTTON_NORMAL = MEDIA .. "deposit-normal"
 local BUTTON_HOVER = MEDIA .. "deposit-hover"
 local BUTTON_PRESSED = MEDIA .. "deposit-pressed"
@@ -285,7 +285,7 @@ function Panel:Create()
     return self.frame
   end
 
-  local frame = CreateFrame("Frame", "WotLKPlusBankDepositPanel", UIParent)
+  local frame = CreateFrame("Frame", "LevoBankDepositPanel", UIParent)
   Theme:ApplyBackdrop(frame, Theme.colors.panel, Theme.colors.border)
   frame:SetWidth(self.LAYOUT.width)
   frame:SetHeight(self:GetRequiredHeight())

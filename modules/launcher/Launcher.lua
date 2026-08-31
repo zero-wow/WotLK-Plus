@@ -1,7 +1,7 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
-local OBJECT_NAME = "WotLKPlus"
+local OBJECT_NAME = "Levo"
 local DEFAULT_MINIMAP_POSITION = 220
 
 local Launcher = {
@@ -99,7 +99,7 @@ function Launcher:OnClick(button)
     if AP.ShowHelp then
       AP:ShowHelp()
     else
-      AP:Print("Type /wp for WotLK Plus commands.")
+      AP:Print("Type /lv for Levo commands.")
     end
     return
   end

@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Theme = AP.UI.Theme
 local CONTENT_INSET = 18
@@ -147,7 +147,7 @@ function Pages:Create(parent)
   local frame = CreateFrame("Frame", nil, parent)
   Theme:ApplyBackdrop(frame, Theme.colors.background, Theme.colors.neutralLine or Theme.colors.border)
 
-  frame.Scroll = CreateFrame("ScrollFrame", "WotLKPlusPagesScroll", frame, "UIPanelScrollFrameTemplate")
+  frame.Scroll = CreateFrame("ScrollFrame", "LevoPagesScroll", frame, "UIPanelScrollFrameTemplate")
   frame.Scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", 1, -1)
   frame.Scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -20, 1)
   Theme:SkinScrollFrame(frame.Scroll)
@@ -198,6 +198,7 @@ function Pages:Create(parent)
     divider = {},
     keybind = {},
     segmented = {},
+    select = {},
     blacklist = {},
     status = {},
   }
@@ -444,11 +445,83 @@ function Pages:Create(parent)
     frame.captureModifierElapsed = 0
   end)
 
+  frame.SelectMenu = CreateFrame("Frame", "LevoConfigSelectMenu", UIParent)
+  frame.SelectMenu:SetFrameStrata("DIALOG")
+  frame.SelectMenu:SetToplevel(true)
+  frame.SelectMenu:SetClampedToScreen(true)
+  Theme:ApplyBackdrop(frame.SelectMenu, Theme.colors.panel, Theme.colors.border)
+  frame.SelectMenu.rows = {}
+  frame.SelectMenu:Hide()
+  if UISpecialFrames then
+    UISpecialFrames[#UISpecialFrames + 1] = "LevoConfigSelectMenu"
+  end
+
+  function frame:ShowSelectMenu(owner, choices, currentValue, onSelect)
+    local menu = self.SelectMenu
+    if not owner or type(choices) ~= "table" or #choices == 0 then
+      menu:Hide()
+      return
+    end
+
+    local width = math.max(180, owner:GetWidth() or 180)
+    menu:SetWidth(width)
+    menu:SetHeight((#choices * 24) + 8)
+    menu:ClearAllPoints()
+    menu:SetPoint("TOPRIGHT", owner, "BOTTOMRIGHT", 0, -4)
+
+    for index = 1, #choices do
+      local choice = choices[index]
+      local selectedValue = choice.value
+      local row = menu.rows[index]
+      if not row then
+        row = CreateFrame("Button", nil, menu)
+        row:SetHeight(22)
+        Theme:SkinButton(row)
+        menu.rows[index] = row
+      end
+      local color = Theme.colors[choice.color or "gold"] or Theme.colors.gold
+      row:ClearAllPoints()
+      row:SetPoint("TOPLEFT", menu, "TOPLEFT", 4, -4 - ((index - 1) * 24))
+      row:SetWidth(width - 8)
+      row:SetText(resolve(choice.label, nil, nil) or tostring(choice.value or ""))
+      row.APButtonStyle = {
+        background = Theme.colors.panel,
+        border = { Theme.colors.border[1], Theme.colors.border[2], Theme.colors.border[3], 0.28 },
+        text = Theme.colors.muted,
+        hoverBackground = Theme.colors.hover,
+        hoverBorder = color,
+        hoverText = color,
+        pressedBackground = Theme.colors.pressed,
+        pressedBorder = color,
+        pressedText = color,
+        selectedBackground = Theme.colors.selection,
+        selectedBorder = color,
+        selectedText = color,
+      }
+      row.APButtonSelected = currentValue == selectedValue
+      row:SetScript("OnClick", function()
+        menu:Hide()
+        if onSelect then
+          onSelect(selectedValue)
+        end
+      end)
+      Theme:RefreshButton(row)
+      row:Show()
+    end
+    for index = #choices + 1, #menu.rows do
+      menu.rows[index]:Hide()
+    end
+    menu:Show()
+  end
+
   function frame:HideAllItems()
     for _, pool in pairs(self.items) do
       for index = 1, #pool do
         pool[index]:Hide()
       end
+    end
+    if self.SelectMenu then
+      self.SelectMenu:Hide()
     end
   end
 
@@ -775,6 +848,37 @@ function Pages:Create(parent)
     return item
   end
 
+  function frame:AcquireSelect(index)
+    local item = self.items.select[index]
+    if item then
+      return item
+    end
+
+    item = CreateFrame("Frame", nil, self.Child)
+    item.Rule = item:CreateTexture(nil, "ARTWORK")
+    item.Rule:SetPoint("BOTTOMLEFT", item, "BOTTOMLEFT", 0, 0)
+    item.Rule:SetPoint("BOTTOMRIGHT", item, "BOTTOMRIGHT", 0, 0)
+    item.Rule:SetHeight(1)
+    Theme:Paint(item.Rule, Theme.colors.neutralLine or Theme.colors.line)
+
+    item.Label = item:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    item.Label:SetJustifyH("LEFT")
+    item.Label:SetPoint("TOPLEFT", item, "TOPLEFT", 0, -9)
+
+    item.Description = item:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    item.Description:SetJustifyH("LEFT")
+    item.Description:SetJustifyV("TOP")
+    item.Description:SetPoint("TOPLEFT", item.Label, "BOTTOMLEFT", 0, -2)
+
+    item.SelectButton = CreateFrame("Button", nil, item)
+    item.SelectButton:SetWidth(200)
+    item.SelectButton:SetHeight(24)
+    Theme:SkinButton(item.SelectButton)
+
+    self.items.select[index] = item
+    return item
+  end
+
   function frame:AcquireBlacklist(index)
     local item = self.items.blacklist[index]
     if item then
@@ -869,6 +973,7 @@ function Pages:Create(parent)
     local dividerIndex = 0
     local keybindIndex = 0
     local segmentedIndex = 0
+    local selectIndex = 0
     local blacklistIndex = 0
     local statusIndex = 0
 
@@ -1106,6 +1211,83 @@ function Pages:Create(parent)
         height = math.max(50, height + 18)
         item.Button:ClearAllPoints()
         item.Button:SetPoint("RIGHT", item, "RIGHT", 0, 0)
+        item:SetHeight(height)
+        y = y - height - ITEM_GAP
+      elseif optionType == "select" then
+        selectIndex = selectIndex + 1
+        local item = self:AcquireSelect(selectIndex)
+        item:ClearAllPoints()
+        item:SetPoint("TOPLEFT", self.Child, "TOPLEFT", CONTENT_INSET, y)
+        item:SetWidth(width)
+        item:Show()
+
+        local label = resolve(option.label, page, option) or "Selection"
+        local description = resolve(option.description, page, option) or ""
+        local choices = resolve(option.choices, page, option) or {}
+        local buttonWidth = tonumber(resolve(option.buttonWidth, page, option)) or 200
+        local disabled = resolve(option.disabled, page, option) and true or false
+        local currentValue
+        if type(option.get) == "function" then
+          currentValue = option.get(page, option)
+        elseif option.path then
+          currentValue = AP.Database:Get(option.path, option.default)
+        end
+
+        local currentLabel = tostring(currentValue or "Select...")
+        for choiceIndex = 1, #choices do
+          local choice = choices[choiceIndex]
+          if choice.value == currentValue then
+            currentLabel = resolve(choice.label, page, option) or currentLabel
+            break
+          end
+        end
+
+        item.Label:SetWidth(math.max(80, width - buttonWidth - 20))
+        item.Label:SetText(label)
+        item.Label:SetTextColor(Theme.colors.text[1], Theme.colors.text[2], Theme.colors.text[3], disabled and 0.45 or 1)
+        item.Description:SetWidth(math.max(80, width - buttonWidth - 20))
+        item.Description:SetText(description)
+        item.Description:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], disabled and 0.45 or 1)
+        if description ~= "" then
+          item.Description:Show()
+        else
+          item.Description:Hide()
+        end
+
+        item.SelectButton:SetWidth(buttonWidth)
+        item.SelectButton:SetText(currentLabel)
+        if disabled then
+          item.SelectButton:Disable()
+        else
+          item.SelectButton:Enable()
+        end
+        Theme:RefreshButton(item.SelectButton)
+        item.SelectButton:SetScript("OnClick", function()
+          if disabled then
+            return
+          end
+          self:ShowSelectMenu(item.SelectButton, choices, currentValue, function(value)
+            if type(option.set) == "function" then
+              option.set(value, page, option)
+            elseif option.path then
+              AP.Database:Set(option.path, value)
+            end
+            if type(option.onChange) == "function" then
+              option.onChange(value, page, option)
+            end
+            if self.onChanged then
+              self.onChanged()
+            end
+          end)
+        end)
+
+        local height = item.Label:GetStringHeight()
+        if description ~= "" then
+          height = height + item.Description:GetStringHeight() + 2
+        end
+        height = math.max(50, height + 18)
+        item.SelectButton:ClearAllPoints()
+        item.SelectButton:SetPoint("RIGHT", item, "RIGHT", 0, 0)
         item:SetHeight(height)
         y = y - height - ITEM_GAP
       elseif optionType == "keybind" then

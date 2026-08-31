@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Banking = AP.Banking
 local Planner = {}
@@ -188,14 +188,17 @@ local function consolidateStacks(slots, slotCount, operations)
   return moveCount
 end
 
-local function buildTarget(slots, slotCount, less)
+local function collectItems(slots, slotCount)
   local items = {}
   for slotID = 1, slotCount do
     if slots[slotID] then
       items[#items + 1] = cloneItem(slots[slotID])
     end
   end
+  return items
+end
 
+local function buildCompactTarget(items, slotCount, less)
   table.sort(items, less)
   local target = {}
   for slotID = 1, #items do
@@ -204,7 +207,115 @@ local function buildTarget(slots, slotCount, less)
   return target, #items
 end
 
-local function findDesiredSource(planner, slots, target, desiredSlot, occupiedSlots, slotCount)
+local function getQualityRule(policy, item)
+  local rules = policy and policy.qualityRules
+  if type(rules) ~= "table" or not item then
+    return nil
+  end
+  return rules[tonumber(item.quality) or -1]
+end
+
+local function buildPolicyTarget(items, slotCount, less, policy)
+  local slotGroups = policy and policy.slotGroups
+  if type(slotGroups) ~= "table" or type(policy.qualityRules) ~= "table" then
+    return buildCompactTarget(items, slotCount, less)
+  end
+
+  local groups = {}
+  local groupOrder = {}
+  for slotID = 1, slotCount do
+    local group = slotGroups[slotID] or "default"
+    if not groups[group] then
+      groups[group] = {}
+      groupOrder[#groupOrder + 1] = group
+    end
+    groups[group][#groups[group] + 1] = slotID
+  end
+
+  local routed = {}
+  local remaining = {}
+  for index = 1, #items do
+    local item = items[index]
+    local rule = getQualityRule(policy, item)
+    local destination = rule and rule.destination or "any"
+    if destination and destination ~= "" and destination ~= "any" then
+      if not groups[destination] then
+        return nil, nil, string.format("The selected destination '%s' is unavailable in this sorting context.", tostring(destination))
+      end
+      routed[destination] = routed[destination] or {}
+      routed[destination][#routed[destination] + 1] = item
+    else
+      remaining[#remaining + 1] = item
+    end
+  end
+
+  local target = {}
+  local reserved = {}
+  local routedItems = 0
+  for group, bucket in pairs(routed) do
+    local slots = groups[group]
+    if #bucket > #slots then
+      return nil, nil, string.format(
+        "The selected destination '%s' has room for %d stack%s but %d matching stack%s need it.",
+        tostring(group),
+        #slots,
+        #slots == 1 and "" or "s",
+        #bucket,
+        #bucket == 1 and "" or "s"
+      )
+    end
+    reserved[group] = true
+    routedItems = routedItems + #bucket
+    table.sort(bucket, less)
+    for index = 1, #bucket do
+      target[slots[index]] = bucket[index]
+    end
+  end
+
+  local availableSlots = {}
+  for groupIndex = 1, #groupOrder do
+    local group = groupOrder[groupIndex]
+    if not reserved[group] then
+      local slots = groups[group]
+      for index = 1, #slots do
+        availableSlots[#availableSlots + 1] = slots[index]
+      end
+    end
+  end
+  if #remaining > #availableSlots then
+    return nil, nil, string.format(
+      "%d stack%s cannot fit outside the bags reserved for quality destinations.",
+      #remaining,
+      #remaining == 1 and "" or "s"
+    )
+  end
+
+  table.sort(remaining, function(left, right)
+    local leftRule = getQualityRule(policy, left)
+    local rightRule = getQualityRule(policy, right)
+    local leftBottom = leftRule and leftRule.mode == "bottom"
+    local rightBottom = rightRule and rightRule.mode == "bottom"
+    if leftBottom ~= rightBottom then
+      return not leftBottom
+    end
+    return less(left, right)
+  end)
+  for index = 1, #remaining do
+    target[availableSlots[index]] = remaining[index]
+  end
+
+  return target, #items, nil, routedItems
+end
+
+local function buildTarget(slots, slotCount, less, policy)
+  local items = collectItems(slots, slotCount)
+  if not policy then
+    return buildCompactTarget(items, slotCount, less)
+  end
+  return buildPolicyTarget(items, slotCount, less, policy)
+end
+
+local function findDesiredSource(planner, slots, target, desiredSlot, slotCount)
   local desired = target[desiredSlot]
   local displaced = slots[desiredSlot]
   local firstMatch
@@ -212,7 +323,7 @@ local function findDesiredSource(planner, slots, target, desiredSlot, occupiedSl
   for sourceSlot = desiredSlot + 1, slotCount do
     if planner:ItemsMatch(slots[sourceSlot], desired) then
       firstMatch = firstMatch or sourceSlot
-      if sourceSlot <= occupiedSlots and planner:ItemsMatch(displaced, target[sourceSlot]) then
+      if planner:ItemsMatch(displaced, target[sourceSlot]) then
         return sourceSlot
       end
     end
@@ -220,12 +331,12 @@ local function findDesiredSource(planner, slots, target, desiredSlot, occupiedSl
   return firstMatch
 end
 
-local function planSortMoves(planner, slots, slotCount, target, occupiedSlots, operations)
+local function planSortMoves(planner, slots, slotCount, target, operations)
   local moveCount = 0
 
-  for targetSlot = 1, occupiedSlots do
+  for targetSlot = 1, slotCount do
     if not planner:ItemsMatch(slots[targetSlot], target[targetSlot]) then
-      local sourceSlot = findDesiredSource(planner, slots, target, targetSlot, occupiedSlots, slotCount)
+      local sourceSlot = findDesiredSource(planner, slots, target, targetSlot, slotCount)
       if not sourceSlot then
         return nil, string.format("Could not resolve target slot %d", targetSlot)
       end
@@ -264,10 +375,13 @@ function Planner:Build(snapshot, less)
   local simulated = copySlots(snapshot.slots, slotCount)
   local operations = {}
   local stackMoves = consolidateStacks(simulated, slotCount, operations)
-  local target, occupiedSlots = buildTarget(simulated, slotCount, less or function(left, right)
+  local target, occupiedSlots, targetError, routedItems = buildTarget(simulated, slotCount, less or function(left, right)
     return self:DefaultLess(left, right)
-  end)
-  local sortMoves, sortError = planSortMoves(self, simulated, slotCount, target, occupiedSlots, operations)
+  end, snapshot)
+  if not target then
+    return nil, targetError
+  end
+  local sortMoves, sortError = planSortMoves(self, simulated, slotCount, target, operations)
   if not sortMoves then
     return nil, sortError
   end
@@ -283,6 +397,7 @@ function Planner:Build(snapshot, less)
     stats = {
       stackMoves = stackMoves,
       sortMoves = sortMoves,
+      routedItems = routedItems or 0,
       totalMoves = #operations,
     },
   }
@@ -292,4 +407,3 @@ function Planner:ApplyExpected(slots, operation)
   slots[operation.sourceSlot] = cloneItem(operation.afterSource)
   slots[operation.targetSlot] = cloneItem(operation.afterTarget)
 end
-

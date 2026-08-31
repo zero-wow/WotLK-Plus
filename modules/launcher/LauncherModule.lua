@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Registry = AP.ConfigRegistry
 
@@ -12,7 +12,7 @@ AP.Modules:Register("launcher", {
       parent = "interface",
       title = "Launcher",
       order = 10,
-      description = "Data Broker and minimap access to WotLK Plus.",
+      description = "Data Broker and minimap access to Levo.",
       searchText = "launcher ldb libdatabroker minimap icon broker chocolatebar config",
       options = function()
         return {
@@ -26,7 +26,7 @@ AP.Modules:Register("launcher", {
           {
             type = "toggle",
             label = "Show minimap button",
-            description = "Show the draggable WotLK Plus icon around the minimap.",
+            description = "Show the draggable Levo icon around the minimap.",
             get = function()
               return AP.Launcher:IsMinimapVisible()
             end,
@@ -55,7 +55,7 @@ AP.Modules:Register("launcher", {
           {
             type = "text",
             label = "Mouse controls",
-            text = "Left-click toggles configuration. Shift + Left-click toggles the optional extension window. Right-click prints the /wp command list in chat.",
+            text = "Left-click toggles configuration. Shift + Left-click toggles the optional extension window. Right-click prints the /lv command list in chat.",
           },
         }
       end,

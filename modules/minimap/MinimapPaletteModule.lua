@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.WotLKPlus or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Palette = AP.MinimapPalette
 local Registry = AP.ConfigRegistry
@@ -14,7 +14,7 @@ AP.Modules:Register("minimapPalette", {
       parent = "interface",
       title = "Minimap Palette",
       order = 15,
-      description = "Collect eligible third-party minimap launcher buttons into a compact WotLK Plus palette without changing their original frames.",
+      description = "Collect eligible third-party minimap launcher buttons into a compact Levo palette without changing their original frames.",
       searchText = "minimap palette launcher buttons icons collect hide restore hub square names right click lock shift drag move visibility",
       options = function()
         return {
@@ -29,7 +29,7 @@ AP.Modules:Register("minimapPalette", {
             type = "toggle",
             path = "modules.minimapPalette",
             label = "Enable minimap palette",
-            description = "Show the WotLK Plus hub button and its expandable launcher list.",
+            description = "Show the Levo hub button and its expandable launcher list.",
             onChange = function()
               AP.Modules:RefreshStates()
             end,

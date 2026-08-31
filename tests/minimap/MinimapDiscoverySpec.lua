@@ -45,7 +45,7 @@ end
 local standard = button("MinimapZoomIn", "Zoom", true)
 
 _G.AscensionPlus = {}
-_G.WotLKPlus = _G.AscensionPlus
+_G.Levo = _G.AscensionPlus
 _G.Minimap = {
   GetChildren = function()
     return fallbackName, standard, valid, protected, hidden
@@ -54,7 +54,7 @@ _G.Minimap = {
 
 dofile(root .. "/modules/minimap/MinimapDiscovery.lua")
 
-local Discovery = _G.WotLKPlus.MinimapPaletteDiscovery
+local Discovery = _G.Levo.MinimapPaletteDiscovery
 local entries = Discovery:GetEntries()
 assert(#entries == 2, "only shown, unprotected, non-standard launcher buttons should be included")
 assert(entries[1].label == "Auctionator" and entries[2].label == "Questie", "entries must use stable alphabetical labels")

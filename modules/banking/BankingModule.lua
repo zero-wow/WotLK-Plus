@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Registry = AP.ConfigRegistry
 local Banking = AP.Banking
@@ -7,6 +7,44 @@ local Categories = Banking.Categories
 local Controller = Banking.Controller
 local Sorter = Banking.Sorter
 local Exclusions = Banking.SorterExclusions
+
+local QUALITY_RULES = {
+  { key = "poor", label = "Poor (Grey)", color = "muted" },
+  { key = "common", label = "Common (White)", color = "text" },
+  { key = "uncommon", label = "Uncommon (Green)", color = "green" },
+  { key = "rare", label = "Rare (Blue)", color = "blue" },
+  { key = "epic", label = "Epic (Purple)", color = "epic" },
+  { key = "legendary", label = "Legendary (Orange)", color = "orange" },
+  { key = "artifact", label = "Artifact", color = "gold" },
+  { key = "heirloom", label = "Heirloom", color = "gold" },
+}
+
+local QUALITY_MODE_CHOICES = {
+  { value = "normal", label = "Normal sort", color = "gold" },
+  { value = "ignore", label = "Ignore completely", color = "red" },
+  { value = "bottom", label = "Bottom-right", color = "blue" },
+}
+
+local INVENTORY_DESTINATIONS = {
+  { value = "any", label = "Any eligible bag", color = "gold" },
+  { value = "backpack", label = "Backpack", color = "gold" },
+  { value = "bag1", label = "Bag 1", color = "gold" },
+  { value = "bag2", label = "Bag 2", color = "gold" },
+  { value = "bag3", label = "Bag 3", color = "gold" },
+  { value = "bag4", label = "Bag 4", color = "gold" },
+}
+
+local CHARACTER_DESTINATIONS = {
+  { value = "any", label = "Any eligible bank bag", color = "gold" },
+  { value = "main", label = "Main Bank", color = "gold" },
+  { value = "bag1", label = "Bank Bag 1", color = "gold" },
+  { value = "bag2", label = "Bank Bag 2", color = "gold" },
+  { value = "bag3", label = "Bank Bag 3", color = "gold" },
+  { value = "bag4", label = "Bank Bag 4", color = "gold" },
+  { value = "bag5", label = "Bank Bag 5", color = "gold" },
+  { value = "bag6", label = "Bank Bag 6", color = "gold" },
+  { value = "bag7", label = "Bank Bag 7", color = "gold" },
+}
 
 local function refreshModuleState()
   AP.Modules:RefreshStates()
@@ -171,22 +209,22 @@ AP.Modules:Register("banking", {
           {
             type = "toggle",
             path = "banking.sorter.enabled",
-            label = "Enable WotLK Plus sorter",
-            description = "Allow WotLK Plus to sort Inventory, Character Bank, and supported visible server-specific bank tabs.",
+            label = "Enable Levo sorter",
+            description = "Allow Levo to sort Inventory, Character Bank, and supported visible server-specific bank tabs.",
             onChange = refreshSorter,
           },
           {
             type = "toggle",
             path = "banking.sorter.showButton",
-            label = "Show WP sort buttons",
-            description = "Attach WP controls to supported visible inventory and bank UIs. Configuration and /wp sort remain available when hidden.",
+            label = "Show Levo sort buttons",
+            description = "Attach Levo controls to supported visible inventory and bank UIs. Configuration and /lv sort remain available when hidden.",
             onChange = refreshSorter,
           },
           {
             type = "toggle",
             path = "banking.sorter.preferNativeAnchor",
             label = "Place beside the host sort button",
-            description = "Prefer a detected ElvUI, Bagnon, AdiBags, or Blizzard sort control. WP is placed immediately left of the host control and never replaces it.",
+            description = "Prefer a detected ElvUI, Bagnon, AdiBags, or Blizzard sort control. Levo is placed immediately left of the host control and never replaces it.",
             onChange = refreshSorter,
           },
           {
@@ -260,9 +298,62 @@ AP.Modules:Register("banking", {
           {
             type = "text",
             label = "Universal command",
-            text = "Use /wp sort for the current context; /wp sort inventory, /wp sort bank, or /wp sort keeper for an explicit target; /wp sort cancel stops safely.",
+            text = "Use /lv sort for the current context; /lv sort inventory, /lv sort bank, or /lv sort keeper for an explicit target; /lv sort cancel stops safely.",
           },
         }
+      end,
+    })
+
+    Registry:RegisterPage({
+      id = "banking.sorter.qualityRules",
+      parent = "banking.sorter",
+      title = "Quality Rules",
+      order = 5,
+      description = "Control exactly how each item quality participates in sorting. Rules are applied to the snapshot before any move is planned.",
+      searchText = "sort quality rarity poor grey common white uncommon green rare blue epic purple legendary orange artifact heirloom ignore exclude bottom right destination specific bag inventory bank reserve",
+      options = function()
+        local options = {
+          {
+            type = "section",
+            label = "Quality handling",
+            description = "IGNORE completely removes that quality from snapshots, stacking, destinations, and verification. BOTTOM-RIGHT places it after normal items. A selected destination reserves that entire eligible bag for that quality; it wins over Bottom-right and stops before moving anything when capacity is insufficient.",
+          },
+          {
+            type = "text",
+            label = "Server-specific Keeper Banks",
+            text = "Keeper Banks use the active tab as one slot area. Quality mode applies there, but Inventory and Character Bank destinations are intentionally ignored because those banks have no bag containers.",
+          },
+        }
+
+        for index = 1, #QUALITY_RULES do
+          local quality = QUALITY_RULES[index]
+          local root = "banking.sorter.qualityRules." .. quality.key
+          options[#options + 1] = {
+            type = "select",
+            path = root .. ".mode",
+            label = quality.label .. " placement",
+            description = "Choose whether " .. quality.label .. " items sort normally, remain completely untouched, or collect at the bottom-right of the available area.",
+            choices = QUALITY_MODE_CHOICES,
+            onChange = refreshSorterExclusions,
+          }
+          options[#options + 1] = {
+            type = "select",
+            path = root .. ".inventoryDestination",
+            label = quality.label .. " Inventory destination",
+            description = "Reserve one eligible carried bag exclusively for this quality. Leave this at Any eligible bag for normal cross-bag sorting.",
+            choices = INVENTORY_DESTINATIONS,
+            onChange = refreshSorterExclusions,
+          }
+          options[#options + 1] = {
+            type = "select",
+            path = root .. ".characterDestination",
+            label = quality.label .. " Character Bank destination",
+            description = "Reserve one eligible Character Bank area exclusively for this quality. This has no effect on Keeper Bank tabs.",
+            choices = CHARACTER_DESTINATIONS,
+            onChange = refreshSorterExclusions,
+          }
+        end
+        return options
       end,
     })
 

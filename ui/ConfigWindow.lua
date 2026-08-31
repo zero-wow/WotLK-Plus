@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Theme = AP.UI.Theme
 local SEARCH_PAGE_ID = "__search__"
@@ -11,7 +11,7 @@ local LAYOUT = {
   maxHeight = 900,
   defaultWidth = 1040,
   defaultHeight = 660,
-  topBarHeight = 52,
+  topBarHeight = 64,
   outerInset = 12,
   navigationWidth = 238,
   contentGutter = 18,
@@ -287,7 +287,7 @@ function ConfigWindow:Initialize()
     return
   end
 
-  local frame = CreateFrame("Frame", "WotLKPlusConfigFrame", UIParent)
+  local frame = CreateFrame("Frame", "LevoConfigFrame", UIParent)
   frame:SetFrameStrata("HIGH")
   frame:SetToplevel(true)
   frame:EnableMouse(true)
@@ -319,7 +319,7 @@ function ConfigWindow:Initialize()
   end)
 
   if UISpecialFrames then
-    table.insert(UISpecialFrames, "WotLKPlusConfigFrame")
+    table.insert(UISpecialFrames, "LevoConfigFrame")
   end
 
   frame.TitleBar = frame:CreateTexture(nil, "ARTWORK")
@@ -335,25 +335,55 @@ function ConfigWindow:Initialize()
   Theme:Paint(frame.TitleLine, Theme.colors.line)
 
   frame.BrandMark = CreateFrame("Frame", nil, frame)
-  frame.BrandMark:SetWidth(32)
-  frame.BrandMark:SetHeight(32)
-  frame.BrandMark:SetPoint("TOPLEFT", frame, "TOPLEFT", 12, -10)
-  Theme:ApplyBackdrop(frame.BrandMark, Theme.colors.inset, Theme.colors.border)
+  frame.BrandMark:SetWidth(48)
+  frame.BrandMark:SetHeight(48)
+  frame.BrandMark:SetPoint("TOPLEFT", frame, "TOPLEFT", 12, -7)
+  frame.BrandMark.pulseTime = 0
 
-  frame.BrandMarkText = frame.BrandMark:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  frame.BrandMarkText:SetPoint("CENTER", frame.BrandMark, "CENTER", 0, 0)
-  frame.BrandMarkText:SetText("AP")
-  frame.BrandMarkText:SetTextColor(Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3], 1)
+  frame.BrandMark.Glow = frame.BrandMark:CreateTexture(nil, "BACKGROUND")
+  frame.BrandMark.Glow:SetPoint("CENTER", frame.BrandMark, "CENTER", 0, 0)
+  frame.BrandMark.Glow:SetTexture("Interface\\AddOns\\Levo\\media\\branding\\levo-crest")
+  frame.BrandMark.Glow:SetVertexColor(Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3], 1)
+  frame.BrandMark.Glow:SetAlpha(0.16)
+
+  frame.BrandMark.Crest = frame.BrandMark:CreateTexture(nil, "ARTWORK")
+  frame.BrandMark.Crest:SetAllPoints(frame.BrandMark)
+  frame.BrandMark.Crest:SetTexture("Interface\\AddOns\\Levo\\media\\branding\\levo-crest")
+
+  frame.BrandMark.Sparks = {}
+  for index = 1, 4 do
+    local spark = frame.BrandMark:CreateTexture(nil, "OVERLAY")
+    spark:SetWidth(2)
+    spark:SetHeight(2)
+    Theme:Paint(spark, Theme.colors.gold)
+    frame.BrandMark.Sparks[index] = spark
+  end
+  frame.BrandMark:SetScript("OnUpdate", function(mark, elapsed)
+    mark.pulseTime = mark.pulseTime + elapsed
+    local pulse = (math.sin(mark.pulseTime * 2.4) + 1) * 0.5
+    local glowSize = 50 + (pulse * 7)
+    mark.Glow:SetWidth(glowSize)
+    mark.Glow:SetHeight(glowSize)
+    mark.Glow:SetAlpha(0.08 + (pulse * 0.14))
+    mark.Crest:SetAlpha(0.88 + (pulse * 0.12))
+    for index = 1, #mark.Sparks do
+      local spark = mark.Sparks[index]
+      local angle = mark.pulseTime * 1.6 + ((index - 1) * (math.pi * 0.5))
+      spark:ClearAllPoints()
+      spark:SetPoint("CENTER", mark, "CENTER", math.cos(angle) * 23, math.sin(angle) * 19)
+      spark:SetAlpha(0.18 + (0.65 * math.max(0, math.sin(angle))))
+    end
+  end)
 
   frame.Title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-  frame.Title:SetPoint("TOPLEFT", frame.BrandMark, "TOPRIGHT", 10, -1)
-  frame.Title:SetText(AP.prettyName or "WotLK Plus")
+  frame.Title:SetPoint("TOPLEFT", frame.BrandMark, "TOPRIGHT", 10, -2)
+  frame.Title:SetText(AP.prettyName or "Levo")
   frame.Title:SetTextColor(Theme.colors.text[1], Theme.colors.text[2], Theme.colors.text[3], Theme.colors.text[4])
   Theme:TrySetTitleFont(frame.Title, 19)
 
   frame.Subtitle = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
   frame.Subtitle:SetPoint("TOPLEFT", frame.Title, "BOTTOMLEFT", 1, -1)
-  frame.Subtitle:SetText("CONTROL CENTER  |  v" .. tostring(AP.version or ""))
+  frame.Subtitle:SetText("FACILITAS FOR WOTLK  |  v" .. tostring(AP.version or ""))
   frame.Subtitle:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], Theme.colors.muted[4])
 
   frame.CloseButton = CreateFrame("Button", nil, frame)
@@ -446,7 +476,7 @@ function ConfigWindow:Initialize()
 
   frame.NavFooter = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
   frame.NavFooter:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", LAYOUT.outerInset + 4, 13)
-  frame.NavFooter:SetText("/wp help  |  settings apply instantly")
+  frame.NavFooter:SetText("/lv help  |  settings apply instantly")
   frame.NavFooter:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], 0.72)
 
   frame.ContentDivider = frame:CreateTexture(nil, "ARTWORK")

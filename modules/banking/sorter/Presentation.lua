@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Banking = AP.Banking
 local Presentation = {
@@ -20,10 +20,10 @@ function Presentation:RegisterAdapter(adapter)
 end
 
 function Presentation:HookFrame(frame)
-  if not frame or frame.__WotLKPlusSorterHooked or type(frame.HookScript) ~= "function" then
+  if not frame or frame.__LevoSorterHooked or type(frame.HookScript) ~= "function" then
     return
   end
-  frame.__WotLKPlusSorterHooked = true
+  frame.__LevoSorterHooked = true
   local function refresh()
     local sorter = Banking.Sorter
     if sorter then

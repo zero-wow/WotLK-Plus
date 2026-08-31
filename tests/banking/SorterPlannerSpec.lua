@@ -33,6 +33,12 @@ local function item(key, count, maxStack, name, itemType)
   }
 end
 
+local function qualityItem(key, quality, count, maxStack, name, itemType)
+  local result = item(key, count, maxStack, name, itemType)
+  result.quality = quality
+  return result
+end
+
 local function snapshot(slotCount, slots)
   for slotID = 1, slotCount do
     if slots[slotID] then
@@ -133,6 +139,62 @@ test("multiple partial stacks conserve counts", function()
   assertEqual(plan.target[2].count, 10, "second stack")
   assertEqual(plan.target[3].count, 4, "remainder stack")
   replay(plan)
+end)
+
+test("quality destinations reserve the selected bag", function()
+  local source = snapshot(6, {
+    [1] = qualityItem("L", 5, 1, 1, "Legendary"),
+    [2] = item("Z", 1, 1, "Zulu"),
+    [3] = item("A", 1, 1, "Alpha"),
+    [4] = item("B", 1, 1, "Bravo"),
+  })
+  source.slotGroups = {
+    [1] = "backpack",
+    [2] = "backpack",
+    [3] = "backpack",
+    [4] = "bag1",
+    [5] = "bag1",
+    [6] = "bag1",
+  }
+  source.qualityRules = {
+    [5] = { mode = "normal", destination = "bag1" },
+  }
+
+  local plan = assert(Planner:Build(source))
+  assertEqual(plan.target[4].name, "Legendary", "legendary target bag")
+  assert(plan.target[5] == nil and plan.target[6] == nil, "the selected destination must remain reserved")
+  assertEqual(plan.stats.routedItems, 1, "dedicated bag routing count")
+  replay(plan)
+end)
+
+test("bottom-right quality items sort after normal items", function()
+  local source = snapshot(3, {
+    [1] = item("Z", 1, 1, "Zulu"),
+    [2] = qualityItem("A", 7, 1, 1, "Heirloom"),
+  })
+  source.slotGroups = { [1] = "backpack", [2] = "backpack", [3] = "backpack" }
+  source.qualityRules = {
+    [7] = { mode = "bottom", destination = "any" },
+  }
+
+  local plan = assert(Planner:Build(source))
+  assertEqual(plan.target[1].name, "Zulu", "normal item must remain before bottom-right heirloom")
+  assertEqual(plan.target[2].name, "Heirloom", "bottom-right heirloom target")
+  replay(plan)
+end)
+
+test("quality destination capacity fails before a move is planned", function()
+  local source = snapshot(3, {
+    [1] = qualityItem("L", 5, 1, 1, "Legendary A"),
+    [2] = qualityItem("M", 5, 1, 1, "Legendary B"),
+  })
+  source.slotGroups = { [1] = "backpack", [2] = "backpack", [3] = "bag1" }
+  source.qualityRules = {
+    [5] = { mode = "normal", destination = "bag1" },
+  }
+
+  local plan, reason = Planner:Build(source)
+  assert(plan == nil and reason:find("has room", 1, true), "capacity must stop the plan before a server move")
 end)
 
 io.write(string.format("%d sorter planner tests passed\n", passed))

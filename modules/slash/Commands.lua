@@ -1,4 +1,4 @@
-local AP = _G.WotLKPlus or _G.AscensionPlus
+local AP = _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 if type(AP) ~= "table" then
   return
 end
@@ -8,20 +8,20 @@ local function trim(text)
 end
 
 local function showHelp()
-  AP:Print("|cffe7c56d" .. tostring(AP.prettyName or "WotLK Plus") .. " commands|r")
-  AP:Print("|cff93c2ff/wp|r or |cff93c2ff/wp help|r - show this help")
-  AP:Print("|cff93c2ff/wp config|r or |cff93c2ff/wpc|r - open configuration")
-  AP:Print("|cff93c2ff/wp search <text>|r - open configuration search")
-  AP:Print("|cff93c2ff/wp sort [inventory|bank|keeper|status|cancel|config]|r - control safe sorting")
+  AP:Print("|cffe7c56d" .. tostring(AP.prettyName or "Levo") .. " commands|r")
+  AP:Print("|cff93c2ff/lv|r or |cff93c2ff/lv help|r - show this help")
+  AP:Print("|cff93c2ff/lv config|r or |cff93c2ff/lvc|r - open configuration")
+  AP:Print("|cff93c2ff/lv search <text>|r - open configuration search")
+  AP:Print("|cff93c2ff/lv sort [inventory|bank|keeper|status|cancel|config]|r - control safe sorting")
   if AP.Modules and AP.Modules:Get("transmog") then
-    AP:Print("|cff93c2ff/wp transmog [needs|all|api|collect|config]|r - open the Appearance Inbox")
+    AP:Print("|cff93c2ff/lv transmog [needs|all|api|collect|config]|r - open the Appearance Inbox")
   end
   if AP.Modules and AP.Modules:Get("skillCards") then
-    AP:Print("|cff93c2ff/wp cards [refresh|config]|r - open the Skill Card Ledger")
+    AP:Print("|cff93c2ff/lv cards [refresh|config]|r - open the Skill Card Ledger")
   end
-  AP:Print("|cff93c2ff/wp minimap|r - show or hide the minimap button")
-  AP:Print("|cff93c2ff/wp status|r - show loader diagnostics")
-  AP:Print("|cff93c2ff/ap|r and |cff93c2ff/apc|r remain legacy aliases.")
+  AP:Print("|cff93c2ff/lv minimap|r - show or hide the minimap button")
+  AP:Print("|cff93c2ff/lv status|r - show loader diagnostics")
+  AP:Print("|cff93c2ff/wp|r, |cff93c2ff/wpc|r, |cff93c2ff/ap|r, and |cff93c2ff/apc|r remain legacy aliases.")
 end
 
 function AP:ShowHelp()
@@ -65,7 +65,7 @@ local function toggleMinimap()
   end
 
   if not AP.Launcher or type(AP.Launcher.ToggleMinimap) ~= "function" then
-    AP:Print("|cffff6666The minimap launcher is unavailable.|r Type /wp status for diagnostics.")
+    AP:Print("|cffff6666The minimap launcher is unavailable.|r Type /lv status for diagnostics.")
     return
   end
 
@@ -82,7 +82,7 @@ local function openConfig(query)
   end
 
   if type(AP.OpenConfig) ~= "function" then
-    AP:Print("|cffff6666The config loader is unavailable.|r Type /wp status for diagnostics.")
+    AP:Print("|cffff6666The config loader is unavailable.|r Type /lv status for diagnostics.")
     return
   end
 
@@ -106,7 +106,7 @@ local function controlSorter(arguments)
 
   local sorter = AP.Banking and AP.Banking.Sorter
   if not sorter or type(sorter.HandleSlash) ~= "function" then
-    AP:Print("|cffff6666The WotLK Plus sorter is unavailable.|r Fully relog if this build added new addon files.")
+    AP:Print("|cffff6666The Levo sorter is unavailable.|r Fully relog if this build added new addon files.")
     return
   end
   sorter:HandleSlash(arguments)
@@ -171,7 +171,7 @@ local function handlePrimarySlash(message)
   elseif command == "status" or command == "debug" then
     showStatus()
   else
-    AP:Print("Unknown command |cffffaa55" .. command .. "|r. Type |cff93c2ff/wp help|r.")
+    AP:Print("Unknown command |cffffaa55" .. command .. "|r. Type |cff93c2ff/lv help|r.")
   end
 end
 
@@ -185,15 +185,23 @@ function AP:RegisterSlashCommands()
     return false, "SlashCmdList is unavailable"
   end
 
+  _G.SLASH_LEVO1 = "/lv"
+  _G.SLASH_LEVO2 = "/levo"
+  _G.SLASH_LEVO3 = "/lev"
+  SlashCmdList.LEVO = handlePrimarySlash
+
+  _G.SLASH_LEVOCONFIG1 = "/lvc"
+  _G.SLASH_LEVOCONFIG2 = "/levoc"
+  SlashCmdList.LEVOCONFIG = handleConfigSlash
+
+  -- Previous names remain available so an existing macro or keybind does not break.
   _G.SLASH_WOTLKPLUS1 = "/wp"
   _G.SLASH_WOTLKPLUS2 = "/wotlkplus"
   SlashCmdList.WOTLKPLUS = handlePrimarySlash
-
   _G.SLASH_WOTLKPLUSCONFIG1 = "/wpc"
   _G.SLASH_WOTLKPLUSCONFIG2 = "/wotlkplusconfig"
   SlashCmdList.WOTLKPLUSCONFIG = handleConfigSlash
 
-  -- Existing Ascension Plus users keep their muscle-memory commands after migration.
   _G.SLASH_ASCENSIONPLUS1 = "/ap"
   _G.SLASH_ASCENSIONPLUS2 = "/ascensionplus"
   SlashCmdList.ASCENSIONPLUS = handlePrimarySlash

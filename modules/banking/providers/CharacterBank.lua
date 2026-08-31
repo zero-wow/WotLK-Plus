@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Banking = AP.Banking
 local Store = Banking.ContainerStore
@@ -117,7 +117,7 @@ function Provider:Transfer(_, location)
   UseContainerItem(location.containerID, location.slotID)
 end
 
--- Compatibility wrappers for callers from older Ascension Plus builds.
+-- Compatibility wrappers for callers from older builds.
 function Provider:HasCapacity(itemLink)
   return self:HasDestinationCapacity("deposit", itemLink)
 end

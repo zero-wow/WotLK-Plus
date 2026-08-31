@@ -1,7 +1,7 @@
 local root = (... and ... ~= "" and ...) or "."
 
 _G.AscensionPlus = {}
-_G.WotLKPlus = _G.AscensionPlus
+_G.Levo = _G.AscensionPlus
 _G.GetSkillCard = nil
 _G.GetLuckyCard = nil
 _G.C_VanityCollection = nil
@@ -12,7 +12,7 @@ _G.GuildBankFrame = nil
 
 dofile(root .. "/core/Compatibility.lua")
 
-local Compatibility = _G.WotLKPlus.Compatibility
+local Compatibility = _G.Levo.Compatibility
 
 assert(not Compatibility:HasSkillCards(), "standard clients must not enable the skill-card extension")
 assert(not Compatibility:HasAppearanceCollection(), "standard clients must not enable the appearance extension")

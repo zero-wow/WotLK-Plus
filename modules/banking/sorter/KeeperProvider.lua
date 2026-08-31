@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Banking = AP.Banking
 local Store = Banking.ContainerStore
@@ -10,6 +10,12 @@ local Exclusions = Banking.SorterExclusions or {
   end,
   IsItemBlocked = function()
     return false
+  end,
+  IsQualityIgnored = function()
+    return false
+  end,
+  GetPlanningRules = function()
+    return {}
   end,
 }
 local Provider = {
@@ -177,17 +183,23 @@ function Provider:TakeSnapshot()
     slots = {},
     lockedSlots = 0,
     excludedItems = 0,
+    excludedQualities = 0,
     excludedBags = 0,
     specialtyBags = 0,
+    slotGroups = {},
+    qualityRules = Exclusions:GetPlanningRules("keeper"),
   }
 
   for slotID = 1, rawSlotCount do
     local item, locked = self:ReadSlot(tab, slotID)
     if item and Exclusions:IsItemBlocked(item.itemID) then
       snapshot.excludedItems = snapshot.excludedItems + 1
+    elseif item and Exclusions:IsQualityIgnored(item.quality) then
+      snapshot.excludedQualities = snapshot.excludedQualities + 1
     else
       local logicalSlot = #snapshot.locations + 1
       snapshot.locations[logicalSlot] = slotID
+      snapshot.slotGroups[logicalSlot] = "keeper"
       snapshot.slots[logicalSlot] = item
       if item then
         item.originalSlot = logicalSlot

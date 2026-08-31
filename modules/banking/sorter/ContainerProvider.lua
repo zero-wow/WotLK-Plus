@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Banking = AP.Banking
 local Planner = Banking.SorterPlanner
@@ -193,8 +193,11 @@ local function createProvider(id, title)
       slots = {},
       lockedSlots = 0,
       excludedItems = 0,
+      excludedQualities = 0,
       excludedBags = 0,
       specialtyBags = 0,
+      slotGroups = {},
+      qualityRules = Exclusions:GetPlanningRules(self.id),
     }
 
     local containers = self:GetContainers()
@@ -212,8 +215,11 @@ local function createProvider(id, title)
         for slotID = 1, slotCount do
           local itemLink = GetContainerItemLink(containerID, slotID)
           local itemID = itemIDFromLink(itemLink)
+          local _, _, _, quality = GetContainerItemInfo(containerID, slotID)
           if itemID and Exclusions:IsItemBlocked(itemID) then
             snapshot.excludedItems = snapshot.excludedItems + 1
+          elseif itemID and Exclusions:IsQualityIgnored(quality) then
+            snapshot.excludedQualities = snapshot.excludedQualities + 1
           else
             local logicalSlot = #snapshot.locations + 1
             local location = {
@@ -223,6 +229,7 @@ local function createProvider(id, title)
               logicalSlot = logicalSlot,
             }
             snapshot.locations[logicalSlot] = location
+            snapshot.slotGroups[logicalSlot] = Exclusions:GetBagKey(self.id, containerID)
             local item, locked = self:ReadLocation(location)
             snapshot.slots[logicalSlot] = item
             if locked then

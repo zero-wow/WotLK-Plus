@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Banking = AP.Banking
 local Categories = Banking.Categories
@@ -262,7 +262,7 @@ function Report:BuildReport(categoryID, provider, depositAudit, withdrawAudit)
     colored = {},
   }
 
-  addLine(document, "ASCENSION PLUS - PRETEND BANK TRANSFER REPORT", paint("ASCENSION PLUS - PRETEND BANK TRANSFER REPORT", COLOR.gold))
+  addLine(document, "LEVO - PRETEND BANK TRANSFER REPORT", paint("LEVO - PRETEND BANK TRANSFER REPORT", COLOR.gold))
   addLine(document, "No items were moved. This report is a read-only simulation of both directions.", paint("No items were moved. This report is a read-only simulation of both directions.", COLOR.green))
   addLine(document, "", "")
   addLine(document, "Button clicked: " .. categoryTitle, paint("Button clicked: ", COLOR.muted) .. paint(categoryTitle, categoryHex))
@@ -374,7 +374,7 @@ function Report:Create()
     return self.frame
   end
 
-  local frame = CreateFrame("Frame", "WotLKPlusPretendReport", UIParent)
+  local frame = CreateFrame("Frame", "LevoPretendReport", UIParent)
   Theme:ApplyBackdrop(frame, Theme.colors.background, Theme.colors.border)
   frame:SetWidth(760)
   frame:SetHeight(540)

@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Banking = AP.Banking
 local Categories = Banking.Categories
@@ -344,7 +344,7 @@ function Controller:CreateScanner()
     return self.scanner
   end
 
-  local scanner = CreateFrame("GameTooltip", "WotLKPlusBankingScanner", UIParent, "GameTooltipTemplate")
+  local scanner = CreateFrame("GameTooltip", "LevoBankingScanner", UIParent, "GameTooltipTemplate")
   scanner:SetOwner(UIParent, "ANCHOR_NONE")
   self.scanner = scanner
   return scanner

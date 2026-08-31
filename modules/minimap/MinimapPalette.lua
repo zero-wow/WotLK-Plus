@@ -1,5 +1,5 @@
 local _, AP = ...
-AP = AP or _G.WotLKPlus or _G.AscensionPlus
+AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Theme = AP.UI.Theme
 local Discovery = AP.MinimapPaletteDiscovery
@@ -12,7 +12,7 @@ local Palette = {
 }
 AP.MinimapPalette = Palette
 
-local ICON_PATH = "Interface\\AddOns\\WotLK-Plus\\media\\minimap\\palette-hub"
+local ICON_PATH = "Interface\\AddOns\\Levo\\media\\minimap\\palette-hub"
 local PANEL_WIDTH = 272
 local ROW_HEIGHT = 27
 local ROW_GAP = 3
@@ -91,7 +91,7 @@ function Palette:CreateControl()
     return self.control
   end
 
-  local control = CreateFrame("Button", "WotLKPlusMinimapPaletteButton", _G.Minimap)
+  local control = CreateFrame("Button", "LevoMinimapPaletteButton", _G.Minimap)
   control:SetWidth(32)
   control:SetHeight(32)
   control:SetFrameStrata("HIGH")
@@ -163,7 +163,7 @@ function Palette:CreatePanel()
     return self.panel
   end
 
-  local panel = CreateFrame("Frame", "WotLKPlusMinimapPalettePanel", UIParent)
+  local panel = CreateFrame("Frame", "LevoMinimapPalettePanel", UIParent)
   panel:SetWidth(PANEL_WIDTH)
   panel:SetFrameStrata("DIALOG")
   panel:SetToplevel(true)
@@ -197,7 +197,7 @@ function Palette:CreatePanel()
   panel.Line:SetHeight(1)
   Theme:Paint(panel.Line, Theme.colors.line)
 
-  panel.Scroll = CreateFrame("ScrollFrame", "WotLKPlusMinimapPaletteScroll", panel, "UIPanelScrollFrameTemplate")
+  panel.Scroll = CreateFrame("ScrollFrame", "LevoMinimapPaletteScroll", panel, "UIPanelScrollFrameTemplate")
   panel.Scroll:SetPoint("TOPLEFT", panel, "TOPLEFT", PANEL_GUTTER, -(HEADER_HEIGHT + 7))
   panel.Scroll:SetWidth(PANEL_WIDTH - (PANEL_GUTTER * 2) - 15)
   panel.Content = CreateFrame("Frame", nil, panel.Scroll)
@@ -218,7 +218,7 @@ function Palette:CreatePanel()
   panel.Footer:SetText("Right-click the hub to lock, restore, or configure.")
 
   if UISpecialFrames then
-    UISpecialFrames[#UISpecialFrames + 1] = "WotLKPlusMinimapPalettePanel"
+    UISpecialFrames[#UISpecialFrames + 1] = "LevoMinimapPalettePanel"
   end
 
   self.panel = panel
@@ -239,7 +239,8 @@ function Palette:CreateRow(index)
   row.Hover:SetAllPoints(row)
   Theme:Paint(row.Hover, { Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3], 0.13 })
 
-  row.Icon = row:CreateTexture(nil, "ARTWORK")
+  row.Icon = row:CreateTexture(nil, "OVERLAY")
+  row.Icon:SetDrawLayer("OVERLAY", 1)
   row.Icon:SetPoint("LEFT", row, "LEFT", 6, 0)
   row.Icon:SetWidth(21)
   row.Icon:SetHeight(21)
@@ -452,7 +453,7 @@ function Palette:ShowMenu()
     AP:OpenConfig("interface.minimapPalette")
     return
   end
-  self.menuFrame = self.menuFrame or CreateFrame("Frame", "WotLKPlusMinimapPaletteMenu", UIParent, "UIDropDownMenuTemplate")
+  self.menuFrame = self.menuFrame or CreateFrame("Frame", "LevoMinimapPaletteMenu", UIParent, "UIDropDownMenuTemplate")
   local menu = {
     { text = "Minimap Palette", isTitle = true, notCheckable = true },
     {
