@@ -17,7 +17,8 @@ local catalog = {
 
 local action, analysis = Planner:Next(build, catalog)
 assert(action and action.id == 3, "the first currently affordable requested talent must be selected")
-assert(analysis.satisfied == 0 and #analysis.blocked == 3, "non-selected targets must be reported as waiting")
+assert(analysis.satisfied == 0 and #analysis.blocked == 2, "blocked targets must be reported as waiting")
+assert(#analysis.available == 1 and analysis.available[1].id == 4, "other affordable requested ranks must not be misreported as blocked")
 
 catalog[1].canSpend = function() return true end
 action = Planner:Next(build, catalog)

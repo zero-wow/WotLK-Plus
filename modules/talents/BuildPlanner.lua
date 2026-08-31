@@ -22,6 +22,7 @@ function Planner:Analyze(build, catalog)
     satisfied = 0,
     missing = {},
     blocked = {},
+    available = {},
     ready = nil,
   }
   catalog = type(catalog) == "table" and catalog or {}
@@ -41,6 +42,12 @@ function Planner:Analyze(build, catalog)
           targetRank = target.rank,
           currentRank = rankOf(entry),
           entry = entry,
+        }
+      elseif canSpend(entry) then
+        result.available[#result.available + 1] = {
+          id = target.id,
+          targetRank = target.rank,
+          currentRank = rankOf(entry),
         }
       else
         result.blocked[#result.blocked + 1] = {

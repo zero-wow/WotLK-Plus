@@ -50,7 +50,9 @@ modules\classes\ClassesModule.lua
 modules\talents\BuildParser.lua
 modules\talents\BuildPlanner.lua
 modules\talents\AscensionAdapter.lua
+modules\talents\ProgressionPlan.lua
 modules\talents\ImportWindow.lua
+modules\talents\TalentRuntime.lua
 modules\talents\TalentImportModule.lua
 
 # Quality-of-life modules

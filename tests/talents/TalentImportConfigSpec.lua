@@ -8,7 +8,9 @@ _G.Levo = {
     BuildParser = {},
     BuildPlanner = {},
     AscensionAdapter = {},
+    ProgressionPlan = {},
     ImportWindow = {},
+    Runtime = {},
   },
   ConfigRegistry = {
     RegisterPage = function(_, page)
@@ -38,5 +40,6 @@ end
 
 assert(found["talentImport.showButton"], "button visibility must be configurable")
 assert(found["talentImport.showTooltips"], "tooltip visibility must be configurable")
+assert(found["talentImport.progression.enabled"], "automatic saved progression must be configurable")
 
 print("TalentImportConfigSpec: OK")

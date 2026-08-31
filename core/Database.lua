@@ -268,6 +268,10 @@ AP.defaults = AP.defaults or {
     showButton = true,
     showTooltips = true,
     lastBuild = "",
+    progression = {
+      enabled = false,
+      build = "",
+    },
   },
   transmog = {
     autoCollect = {
