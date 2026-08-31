@@ -10,7 +10,8 @@ end
 local function showHelp()
   AP:Print("|cffe7c56d" .. tostring(AP.prettyName or "Levo") .. " commands|r")
   AP:Print("|cff93c2ff/lv|r or |cff93c2ff/lv help|r - show this help")
-  AP:Print("|cff93c2ff/lv config|r or |cff93c2ff/lvc|r - open configuration")
+  AP:Print("|cff93c2ff/levo|r or |cff93c2ff/lvc|r - open configuration")
+  AP:Print("|cff93c2ff/lv config|r - open configuration from the help command")
   AP:Print("|cff93c2ff/lv search <text>|r - open configuration search")
   AP:Print("|cff93c2ff/lv sort [inventory|bank|keeper|status|cancel|config]|r - control safe sorting")
   if AP.Modules and AP.Modules:Get("transmog") then
@@ -186,12 +187,12 @@ function AP:RegisterSlashCommands()
   end
 
   _G.SLASH_LEVO1 = "/lv"
-  _G.SLASH_LEVO2 = "/levo"
-  _G.SLASH_LEVO3 = "/lev"
+  _G.SLASH_LEVO2 = "/lev"
   SlashCmdList.LEVO = handlePrimarySlash
 
-  _G.SLASH_LEVOCONFIG1 = "/lvc"
-  _G.SLASH_LEVOCONFIG2 = "/levoc"
+  _G.SLASH_LEVOCONFIG1 = "/levo"
+  _G.SLASH_LEVOCONFIG2 = "/lvc"
+  _G.SLASH_LEVOCONFIG3 = "/levoc"
   SlashCmdList.LEVOCONFIG = handleConfigSlash
 
   -- Previous names remain available so an existing macro or keybind does not break.

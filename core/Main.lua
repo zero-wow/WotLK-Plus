@@ -103,7 +103,7 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
         showMessage = AP.Database:Get("general.showStartupMessage", true)
       end
       if showMessage then
-        AP:Print(string.format("%s v%s loaded. Type |cff93c2ff/lv|r for help or |cff93c2ff/lvc|r for configuration.", AP.prettyName, AP.version))
+        AP:Print(string.format("%s v%s loaded. Type |cff93c2ff/lv|r for help or |cff93c2ff/levo|r for configuration.", AP.prettyName, AP.version))
       end
     else
       AP:Print("|cffff6666Core loaded, but startup did not complete.|r Type /lv status for the captured error.")
