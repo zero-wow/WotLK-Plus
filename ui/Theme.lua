@@ -406,10 +406,10 @@ function Theme:SkinScrollFrame(scrollFrame)
 
   self:StripTextures(scrollBar)
   self:ApplyBackdrop(scrollBar, self.colors.inset, { self.colors.border[1], self.colors.border[2], self.colors.border[3], 0.28 })
-  scrollBar:SetWidth(12)
+  scrollBar:SetWidth(10)
   scrollBar:ClearAllPoints()
-  scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 5, -15)
-  scrollBar:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", 5, 15)
+  scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 3, -10)
+  scrollBar:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", 3, 10)
 
   if scrollBar.SetThumbTexture then
     scrollBar:SetThumbTexture(self.texture)
@@ -421,8 +421,8 @@ function Theme:SkinScrollFrame(scrollFrame)
   if thumb then
     thumb:SetTexture(self.texture)
     thumb:SetVertexColor(self.colors.gold[1], self.colors.gold[2], self.colors.gold[3], 0.82)
-    thumb:SetWidth(8)
-    thumb:SetHeight(24)
+    thumb:SetWidth(6)
+    thumb:SetHeight(20)
     thumb:SetAlpha(1)
   end
 
@@ -436,8 +436,8 @@ function Theme:SkinScrollFrame(scrollFrame)
   if upButton then
     self:SkinButton(upButton, arrowStyle)
     upButton:SetText("^")
-    upButton:SetWidth(12)
-    upButton:SetHeight(12)
+    upButton:SetWidth(10)
+    upButton:SetHeight(10)
     upButton:ClearAllPoints()
     upButton:SetPoint("BOTTOM", scrollBar, "TOP", 0, 2)
     self:RefreshButton(upButton)
@@ -445,8 +445,8 @@ function Theme:SkinScrollFrame(scrollFrame)
   if downButton then
     self:SkinButton(downButton, arrowStyle)
     downButton:SetText("v")
-    downButton:SetWidth(12)
-    downButton:SetHeight(12)
+    downButton:SetWidth(10)
+    downButton:SetHeight(10)
     downButton:ClearAllPoints()
     downButton:SetPoint("TOP", scrollBar, "BOTTOM", 0, -2)
     self:RefreshButton(downButton)
@@ -461,6 +461,8 @@ function Theme:SkinScrollFrame(scrollFrame)
 
   scrollFrame.APThemedScroll = true
   scrollFrame.APScrollBar = scrollBar
+  scrollFrame.APScrollUpButton = upButton
+  scrollFrame.APScrollDownButton = downButton
 end
 
 function Theme:SkinEditBox(editBox, shell)

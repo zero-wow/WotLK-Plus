@@ -5,18 +5,18 @@ local Theme = AP.UI.Theme
 local SEARCH_PAGE_ID = "__search__"
 local SEARCH_DEBOUNCE_SECONDS = 0.08
 local LAYOUT = {
-  minWidth = 840,
-  minHeight = 500,
+  minWidth = 680,
+  minHeight = 400,
   maxWidth = 1440,
   maxHeight = 900,
-  defaultWidth = 960,
-  defaultHeight = 590,
-  topBarHeight = 50,
-  outerInset = 8,
-  navigationWidth = 220,
-  contentGutter = 12,
-  footerHeight = 20,
-  contentBottom = 28,
+  defaultWidth = 760,
+  defaultHeight = 470,
+  topBarHeight = 42,
+  outerInset = 6,
+  navigationWidth = 174,
+  contentGutter = 10,
+  footerHeight = 18,
+  contentBottom = 24,
 }
 
 local ConfigWindow = {
@@ -335,9 +335,9 @@ function ConfigWindow:Initialize()
   Theme:Paint(frame.TitleLine, Theme.colors.line)
 
   frame.BrandMark = CreateFrame("Frame", nil, frame)
-  frame.BrandMark:SetWidth(38)
-  frame.BrandMark:SetHeight(38)
-  frame.BrandMark:SetPoint("TOPLEFT", frame, "TOPLEFT", 8, -5)
+  frame.BrandMark:SetWidth(30)
+  frame.BrandMark:SetHeight(30)
+  frame.BrandMark:SetPoint("TOPLEFT", frame, "TOPLEFT", 6, -4)
   frame.BrandMark.pulseTime = 0
 
   frame.BrandMark.Glow = frame.BrandMark:CreateTexture(nil, "BACKGROUND")
@@ -361,7 +361,7 @@ function ConfigWindow:Initialize()
   frame.BrandMark:SetScript("OnUpdate", function(mark, elapsed)
     mark.pulseTime = mark.pulseTime + elapsed
     local pulse = (math.sin(mark.pulseTime * 2.4) + 1) * 0.5
-    local glowSize = 40 + (pulse * 5)
+    local glowSize = 32 + (pulse * 4)
     mark.Glow:SetWidth(glowSize)
     mark.Glow:SetHeight(glowSize)
     mark.Glow:SetAlpha(0.08 + (pulse * 0.14))
@@ -370,16 +370,16 @@ function ConfigWindow:Initialize()
       local spark = mark.Sparks[index]
       local angle = mark.pulseTime * 1.6 + ((index - 1) * (math.pi * 0.5))
       spark:ClearAllPoints()
-      spark:SetPoint("CENTER", mark, "CENTER", math.cos(angle) * 18, math.sin(angle) * 15)
+      spark:SetPoint("CENTER", mark, "CENTER", math.cos(angle) * 14, math.sin(angle) * 12)
       spark:SetAlpha(0.18 + (0.65 * math.max(0, math.sin(angle))))
     end
   end)
 
   frame.Title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-  frame.Title:SetPoint("TOPLEFT", frame.BrandMark, "TOPRIGHT", 7, -1)
+  frame.Title:SetPoint("TOPLEFT", frame.BrandMark, "TOPRIGHT", 6, 0)
   frame.Title:SetText(AP.prettyName or "Levo")
   frame.Title:SetTextColor(Theme.colors.text[1], Theme.colors.text[2], Theme.colors.text[3], Theme.colors.text[4])
-  Theme:TrySetTitleFont(frame.Title, 18)
+  Theme:TrySetTitleFont(frame.Title, 16)
 
   frame.Subtitle = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
   frame.Subtitle:SetPoint("TOPLEFT", frame.Title, "BOTTOMLEFT", 1, -1)
@@ -387,9 +387,9 @@ function ConfigWindow:Initialize()
   frame.Subtitle:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], Theme.colors.muted[4])
 
   frame.CloseButton = CreateFrame("Button", nil, frame)
-  frame.CloseButton:SetWidth(22)
-  frame.CloseButton:SetHeight(22)
-  frame.CloseButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -8, -12)
+  frame.CloseButton:SetWidth(18)
+  frame.CloseButton:SetHeight(18)
+  frame.CloseButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -6, -10)
   Theme:SkinCloseButton(frame.CloseButton, "x")
   frame.CloseButton:SetScript("OnClick", function()
     frame:Hide()
@@ -397,12 +397,12 @@ function ConfigWindow:Initialize()
 
   frame.SearchShell = CreateFrame("Frame", nil, frame)
   Theme:ApplyBackdrop(frame.SearchShell, Theme.colors.inset, Theme.colors.border)
-  frame.SearchShell:SetPoint("TOPRIGHT", frame.CloseButton, "TOPLEFT", -8, 0)
-  frame.SearchShell:SetWidth(270)
-  frame.SearchShell:SetHeight(26)
+  frame.SearchShell:SetPoint("TOPRIGHT", frame.CloseButton, "TOPLEFT", -6, 0)
+  frame.SearchShell:SetWidth(220)
+  frame.SearchShell:SetHeight(22)
 
   frame.SearchLabel = frame.SearchShell:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  frame.SearchLabel:SetPoint("LEFT", frame.SearchShell, "LEFT", 6, 0)
+  frame.SearchLabel:SetPoint("LEFT", frame.SearchShell, "LEFT", 5, 0)
   frame.SearchLabel:SetText("FIND")
   frame.SearchLabel:SetTextColor(Theme.colors.gold[1], Theme.colors.gold[2], Theme.colors.gold[3], 0.85)
 
@@ -410,8 +410,8 @@ function ConfigWindow:Initialize()
   frame.SearchBox:SetAutoFocus(false)
   frame.SearchBox:SetFontObject(ChatFontNormal)
   frame.SearchBox:SetTextColor(Theme.colors.text[1], Theme.colors.text[2], Theme.colors.text[3], Theme.colors.text[4])
-  frame.SearchBox:SetPoint("TOPLEFT", frame.SearchShell, "TOPLEFT", 39, -1)
-  frame.SearchBox:SetPoint("BOTTOMRIGHT", frame.SearchShell, "BOTTOMRIGHT", -26, 1)
+  frame.SearchBox:SetPoint("TOPLEFT", frame.SearchShell, "TOPLEFT", 34, -1)
+  frame.SearchBox:SetPoint("BOTTOMRIGHT", frame.SearchShell, "BOTTOMRIGHT", -22, 1)
   if frame.SearchBox.SetTextInsets then
     frame.SearchBox:SetTextInsets(0, 0, 0, 0)
   end
@@ -453,9 +453,9 @@ function ConfigWindow:Initialize()
   Theme:SkinEditBox(frame.SearchBox, frame.SearchShell)
 
   frame.SearchClear = CreateFrame("Button", nil, frame.SearchShell)
-  frame.SearchClear:SetWidth(18)
-  frame.SearchClear:SetHeight(18)
-  frame.SearchClear:SetPoint("RIGHT", frame.SearchShell, "RIGHT", -4, 0)
+  frame.SearchClear:SetWidth(16)
+  frame.SearchClear:SetHeight(16)
+  frame.SearchClear:SetPoint("RIGHT", frame.SearchShell, "RIGHT", -3, 0)
   Theme:SkinCloseButton(frame.SearchClear, "x")
   frame.SearchClear:SetScript("OnClick", function()
     frame.SearchBox:SetText("")
@@ -471,11 +471,11 @@ function ConfigWindow:Initialize()
 
   frame.Tree = AP.UI.Tree:Create(frame)
   frame.Tree:SetPoint("TOPLEFT", frame, "TOPLEFT", LAYOUT.outerInset, -(LAYOUT.topBarHeight + LAYOUT.outerInset))
-  frame.Tree:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", LAYOUT.outerInset, LAYOUT.footerHeight + 8)
+  frame.Tree:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", LAYOUT.outerInset, LAYOUT.footerHeight + 6)
   frame.Tree:SetWidth(LAYOUT.navigationWidth)
 
   frame.NavFooter = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-  frame.NavFooter:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", LAYOUT.outerInset + 2, 10)
+  frame.NavFooter:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", LAYOUT.outerInset, 8)
   frame.NavFooter:SetText("/lv help  |  settings apply instantly")
   frame.NavFooter:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], 0.72)
 
@@ -496,9 +496,9 @@ function ConfigWindow:Initialize()
   end
 
   frame.ResizeGrip = CreateFrame("Button", nil, frame)
-  frame.ResizeGrip:SetWidth(14)
-  frame.ResizeGrip:SetHeight(14)
-  frame.ResizeGrip:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -6, 6)
+  frame.ResizeGrip:SetWidth(12)
+  frame.ResizeGrip:SetHeight(12)
+  frame.ResizeGrip:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -5, 5)
   Theme:SkinResizeGrip(frame.ResizeGrip)
   frame.ResizeGrip:SetScript("OnMouseDown", function()
     frame.ResizeGrip.APGripPressed = true

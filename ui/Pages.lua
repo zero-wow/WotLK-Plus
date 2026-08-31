@@ -2,9 +2,9 @@ local _, AP = ...
 AP = AP or _G.Levo or _G.WotLKPlus or _G.AscensionPlus
 
 local Theme = AP.UI.Theme
-local CONTENT_INSET = 12
-local ITEM_GAP = 1
-local SECTION_GAP = 8
+local CONTENT_INSET = 8
+local ITEM_GAP = 0
+local SECTION_GAP = 6
 
 local Pages = {}
 AP.UI.Pages = Pages
@@ -163,9 +163,52 @@ function Pages:Create(parent)
   frame.Child:SetWidth(720)
   frame.Child:SetHeight(1)
   frame.Scroll:SetScrollChild(frame.Child)
+
+  function frame:SetScrollBarVisible(visible)
+    visible = visible and true or false
+    if self.scrollBarVisible == visible then
+      return false
+    end
+
+    self.scrollBarVisible = visible
+    local scrollBar = self.Scroll.APScrollBar
+    local upButton = self.Scroll.APScrollUpButton
+    local downButton = self.Scroll.APScrollDownButton
+    if visible then
+      if scrollBar then scrollBar:Show() end
+      if upButton then upButton:Show() end
+      if downButton then downButton:Show() end
+    else
+      if scrollBar then scrollBar:Hide() end
+      if upButton then upButton:Hide() end
+      if downButton then downButton:Hide() end
+      self.Scroll:SetVerticalScroll(0)
+    end
+
+    self.Scroll:ClearAllPoints()
+    self.Scroll:SetPoint("TOPLEFT", self, "TOPLEFT", 1, -1)
+    self.Scroll:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", visible and -16 or -1, 1)
+    updateScrollChildWidth(self.Scroll, self.Child)
+    return true
+  end
+
+  function frame:RefreshScrollChrome()
+    if self.refreshingScrollChrome then
+      return false
+    end
+    self.refreshingScrollChrome = true
+    local changed = self:SetScrollBarVisible((self.Scroll:GetVerticalScrollRange() or 0) > 0)
+    self.refreshingScrollChrome = false
+    return changed
+  end
+
   frame.Scroll:SetScript("OnSizeChanged", function(self)
     updateScrollChildWidth(self, frame.Child)
+    if not frame.refreshingScrollChrome then
+      frame:RefreshScrollChrome()
+    end
   end)
+  frame:SetScrollBarVisible(false)
 
   frame.Breadcrumb = frame.Child:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
   frame.Breadcrumb:SetJustifyH("LEFT")
@@ -174,7 +217,7 @@ function Pages:Create(parent)
   frame.Title = frame.Child:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
   frame.Title:SetJustifyH("LEFT")
   frame.Title:SetPoint("TOPLEFT", frame.Breadcrumb, "BOTTOMLEFT", 0, -3)
-  Theme:TrySetTitleFont(frame.Title, 22)
+  Theme:TrySetTitleFont(frame.Title, 20)
 
   frame.Description = frame.Child:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
   frame.Description:SetJustifyH("LEFT")
@@ -187,7 +230,7 @@ function Pages:Create(parent)
 
   frame.HeaderAccent = frame.Child:CreateTexture(nil, "ARTWORK")
   frame.HeaderAccent:SetHeight(2)
-  frame.HeaderAccent:SetWidth(38)
+  frame.HeaderAccent:SetWidth(32)
   Theme:Paint(frame.HeaderAccent, Theme.colors.gold)
 
   frame.items = {
@@ -527,7 +570,7 @@ function Pages:Create(parent)
 
   function frame:LayoutHeader(title, description, breadcrumb)
     local width = (self.Child:GetWidth() or 720) - (CONTENT_INSET * 2)
-    local y = -12
+    local y = -8
 
     self.Breadcrumb:ClearAllPoints()
     self.Breadcrumb:SetWidth(width)
@@ -548,7 +591,7 @@ function Pages:Create(parent)
     self.Title:SetText(title or "")
     self.Title:SetTextColor(Theme.colors.text[1], Theme.colors.text[2], Theme.colors.text[3], Theme.colors.text[4])
     self.Title:Show()
-    y = y - self.Title:GetStringHeight() - 6
+    y = y - self.Title:GetStringHeight() - 4
 
     description = description or ""
     self.Description:ClearAllPoints()
@@ -558,7 +601,7 @@ function Pages:Create(parent)
     self.Description:SetTextColor(Theme.colors.muted[1], Theme.colors.muted[2], Theme.colors.muted[3], Theme.colors.muted[4])
     if description ~= "" then
       self.Description:Show()
-      y = y - self.Description:GetStringHeight() - 8
+      y = y - self.Description:GetStringHeight() - 5
     else
       self.Description:Hide()
       y = y - 2
@@ -572,7 +615,7 @@ function Pages:Create(parent)
     self.HeaderAccent:ClearAllPoints()
     self.HeaderAccent:SetPoint("TOPLEFT", self.Child, "TOPLEFT", CONTENT_INSET, y + 1)
     self.HeaderAccent:Show()
-    y = y - 8
+    y = y - 5
 
     return width, y
   end
@@ -1597,8 +1640,11 @@ function Pages:Create(parent)
       end
     end
 
-    self.Child:SetHeight(math.abs(y) + 12)
+    self.Child:SetHeight(math.abs(y) + 8)
     self.Scroll:SetVerticalScroll(math.max(0, targetScroll))
+    if self:RefreshScrollChrome() then
+      self:RenderPage(page)
+    end
   end
 
   function frame:RenderSearch(query, results)
@@ -1638,7 +1684,10 @@ function Pages:Create(parent)
       item.Body:SetTextColor(Theme.colors.text[1], Theme.colors.text[2], Theme.colors.text[3], Theme.colors.text[4])
       local height = item.Title:GetStringHeight() + item.Body:GetStringHeight() + 2
       item:SetHeight(height)
-      self.Child:SetHeight(math.abs(y) + height + 12)
+      self.Child:SetHeight(math.abs(y) + height + 8)
+      if self:RefreshScrollChrome() then
+        self:RenderSearch(query, results)
+      end
       return
     end
 
@@ -1663,12 +1712,15 @@ function Pages:Create(parent)
         end
       end)
 
-      local height = item.Title:GetStringHeight() + item.Path:GetStringHeight() + item.Summary:GetStringHeight() + 14
+      local height = item.Title:GetStringHeight() + item.Path:GetStringHeight() + item.Summary:GetStringHeight() + 10
       item:SetHeight(height)
       y = y - height - ITEM_GAP
     end
 
-    self.Child:SetHeight(math.abs(y) + 12)
+    self.Child:SetHeight(math.abs(y) + 8)
+    if self:RefreshScrollChrome() then
+      self:RenderSearch(query, results)
+    end
   end
 
   return frame
