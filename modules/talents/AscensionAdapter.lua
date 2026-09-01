@@ -137,6 +137,25 @@ local function controlCanSpend(control)
   return true
 end
 
+local function characterAdvancementAPI()
+  local api = _G.C_CharacterAdvancement
+  return type(api) == "table" and api or nil
+end
+
+local function callCharacterAdvancement(method, ...)
+  local api = characterAdvancementAPI()
+  local action = api and api[method]
+  if type(action) ~= "function" then
+    return nil, nil, false
+  end
+
+  local ok, result, detail = pcall(action, ...)
+  if not ok then
+    return false, tostring(result), true
+  end
+  return result, detail, true
+end
+
 function Adapter:GetTalentFrame()
   return _G.CoATalentFrame
 end
@@ -196,7 +215,17 @@ function Adapter:GetCatalog()
         control = control,
       }
       candidate.canSpend = function()
-        return candidate.rank < candidate.maxRank and controlCanSpend(candidate.control)
+        if candidate.rank >= candidate.maxRank then
+          return false
+        end
+
+        -- The tree's visual node can be enabled even when Ascension rejects the
+        -- node. Prefer the server-backed eligibility API whenever it exists.
+        local allowed, _, hasEligibilityAPI = callCharacterAdvancement("CanAddByEntryID", candidate.id, 1)
+        if hasEligibilityAPI and allowed ~= nil then
+          return allowed and true or false
+        end
+        return controlCanSpend(candidate.control)
       end
       if not existing or candidate.rank > existing.rank then
         catalog[entryID] = candidate
@@ -234,11 +263,26 @@ function Adapter:GetCatalog()
 end
 
 function Adapter:Spend(entry)
-  if not entry or not entry.control then
-    return false, "That requested talent is not clickable in the current tree."
+  if not entry then
+    return false, "That requested talent is not visible in the current tree."
   end
   if not entry.canSpend or not entry.canSpend() then
     return false, "That requested talent is not currently affordable or its prerequisites are not met."
+  end
+
+  -- Ascension exposes a direct pending-build mutation API. Clicking a frame
+  -- child is unreliable because several children are presentational only.
+  local api = characterAdvancementAPI()
+  if api and type(api.AddByEntryID) == "function" then
+    local added, detail = callCharacterAdvancement("AddByEntryID", entry.id, 1)
+    if added == false then
+      return false, detail or "Ascension rejected that requested rank."
+    end
+    return true
+  end
+
+  if not entry.control then
+    return false, "Ascension did not expose a direct add API and the requested talent has no clickable control."
   end
   return self:ClickControl(entry.control)
 end
@@ -294,6 +338,39 @@ function Adapter:GetCommitControl()
 end
 
 function Adapter:CommitPreview()
+  -- These are the native pending-build actions used by Ascension's Apply
+  -- control. Prefer them to guessing which sibling button commits the tree.
+  local canApply = _G.CanApplyPendingBuild
+  local apply = _G.ApplyPendingBuild
+  if type(apply) == "function" then
+    if type(canApply) == "function" then
+      local checked, allowed = pcall(canApply)
+      if not checked then
+        return false, tostring(allowed)
+      end
+      if allowed == false then
+        return false, "Ascension reports that the pending build cannot be applied yet."
+      end
+    end
+    local invoked, result = pcall(apply)
+    if not invoked then
+      return false, tostring(result)
+    end
+    if result == false then
+      return false, "Ascension rejected the pending-build commit."
+    end
+    return true
+  end
+
+  local api = characterAdvancementAPI()
+  if api and type(api.ApplyPendingBuild) == "function" then
+    local invoked, detail = callCharacterAdvancement("ApplyPendingBuild")
+    if invoked == false then
+      return false, detail or "Ascension rejected the pending-build commit."
+    end
+    return true
+  end
+
   local control = self:GetCommitControl()
   if not control then
     return false, "Ascension's native Apply/Save control was not found."
