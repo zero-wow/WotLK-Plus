@@ -15,12 +15,43 @@ local Runtime = {
 }
 AP.TalentImport.Runtime = Runtime
 
+local PROGRESSION_EVENT_DELAY = 0.60
+local PROGRESSION_RETRY_DELAY = 0.80
+local PROGRESSION_SETTLE_WINDOW = 8
+local PROGRESSION_UI_RETRY_DELAY = 3
+local PROGRESSION_SIGNAL_INTERVAL = 0.75
+
 local function now()
   return type(GetTime) == "function" and GetTime() or 0
 end
 
 local function inCombat()
   return type(InCombatLockdown) == "function" and InCombatLockdown() and true or false
+end
+
+local function getPlayerLevel()
+  if type(UnitLevel) ~= "function" then
+    return nil
+  end
+  local ok, level = pcall(UnitLevel, "player")
+  return ok and tonumber(level) or nil
+end
+
+local function getUnspentTalentPoints()
+  if type(GetUnspentTalentPoints) ~= "function" then
+    return nil
+  end
+
+  local group = 1
+  if type(GetActiveTalentGroup) == "function" then
+    local groupOk, activeGroup = pcall(GetActiveTalentGroup)
+    if groupOk and tonumber(activeGroup) then
+      group = tonumber(activeGroup)
+    end
+  end
+
+  local ok, points = pcall(GetUnspentTalentPoints, false, false, group)
+  return ok and tonumber(points) or nil
 end
 
 local function shortList(entries, formatter)
@@ -251,7 +282,7 @@ function Runtime:StartBuild(build, options)
   local action, analysis = Planner:Next(build, catalog)
   if not action then
     self:SetStatus(self:Describe(build, analysis), "muted", options.presentReport)
-    return false, "no-affordable-ranks"
+    return false, "no-affordable-ranks", analysis
   end
 
   self.session = {
@@ -283,33 +314,63 @@ function Runtime:SaveAndApply(text)
   if not build then
     return false, reason
   end
-  Plan:Save(build.source)
-  self:WakeProgression("saved progression build")
-  local started, startReason = self:StartBuild(build, {
+  local saved, saveReason = Plan:Save(build.source)
+  if not saved then
+    self:SetStatus(saveReason, "red", true)
+    return false, saveReason
+  end
+
+  self:WakeProgression("saved progression build", 0)
+  local started, startReason, analysis = self:StartBuild(build, {
     commit = true,
     progression = true,
     presentReport = true,
   })
-  if not started and startReason == "no-affordable-ranks" then
-    self:SetStatus("SAVED PROGRESSION BUILD\n" .. self:GetProgressionSummary() .. " It will apply the next requested rank automatically after you gain points and are out of combat.", "gold", true)
+  if started then
+    self:ClearProgressionSchedule()
     return true
   end
-  return started, startReason
+
+  if startReason == "no-affordable-ranks" then
+    if analysis and analysis.satisfied == #build.targets then
+      self:ClearProgressionSchedule()
+    else
+      self.progressionDue = true
+      self.nextProgressionAt = now() + PROGRESSION_RETRY_DELAY
+    end
+    self:SetStatus("SAVED PROGRESSION BUILD\n" .. self:GetProgressionSummary() .. " It will apply the next requested rank automatically after you gain points and are out of combat.", "gold", true)
+    return true
+  elseif startReason == "talent-tree-unavailable" then
+    self.progressionDue = true
+    self.nextProgressionAt = now() + PROGRESSION_UI_RETRY_DELAY
+    self:SetStatus("SAVED PROGRESSION BUILD\n" .. self:GetProgressionSummary() .. " Levo will apply it automatically when Ascension's talent tree becomes available.", "gold", true)
+    return true
+  end
+  return false, startReason
 end
 
 function Runtime:ClearProgression()
   Plan:Clear()
-  self.progressionDue = false
+  self:ClearProgressionSchedule()
   self:SetStatus("Saved progression build cleared.", "muted", true)
 end
 
-function Runtime:WakeProgression(reason)
+function Runtime:ClearProgressionSchedule()
+  self.progressionDue = false
+  self.progressionReason = nil
+  self.nextProgressionAt = nil
+  self.progressionRetryUntil = nil
+end
+
+function Runtime:WakeProgression(reason, delay)
   if not Plan:IsEnabled() then
     return
   end
+  local currentTime = now()
   self.progressionDue = true
   self.progressionReason = reason or "new talent points"
-  self.nextProgressionAt = 0
+  self.nextProgressionAt = currentTime + math.max(tonumber(delay) or PROGRESSION_EVENT_DELAY, 0)
+  self.progressionRetryUntil = currentTime + PROGRESSION_SETTLE_WINDOW
 end
 
 function Runtime:TryProgression()
@@ -323,22 +384,51 @@ function Runtime:TryProgression()
   if currentTime < (self.nextProgressionAt or 0) then
     return
   end
-  self.progressionDue = false
 
   local build, reason = Parser:Parse(Plan:GetBuild())
   if not build then
     Plan:Clear()
+    self:ClearProgressionSchedule()
     self:SetStatus("Saved progression build was invalid and has been cleared: " .. tostring(reason), "red")
     return
   end
-  local started, startReason = self:StartBuild(build, {
+  local started, startReason, analysis = self:StartBuild(build, {
     commit = true,
     progression = true,
     quiet = true,
   })
-  if not started and startReason == "talent-tree-unavailable" then
+  if started then
+    self:ClearProgressionSchedule()
+  elseif startReason == "talent-tree-unavailable" then
     self.progressionDue = true
-    self.nextProgressionAt = currentTime + 3
+    self.nextProgressionAt = currentTime + PROGRESSION_UI_RETRY_DELAY
+  elseif startReason == "no-affordable-ranks"
+      and analysis and analysis.satisfied < #build.targets
+      and currentTime < (self.progressionRetryUntil or 0) then
+    -- Ascension often updates its credits shortly after the level event.
+    self.progressionDue = true
+    self.nextProgressionAt = currentTime + PROGRESSION_RETRY_DELAY
+  else
+    self:ClearProgressionSchedule()
+  end
+end
+
+function Runtime:PollProgressionSignals()
+  if not Plan:IsEnabled() then
+    self.lastProgressionLevel = nil
+    self.lastProgressionPoints = nil
+    return
+  end
+
+  local level = getPlayerLevel()
+  local points = getUnspentTalentPoints()
+  local levelChanged = level and self.lastProgressionLevel and level ~= self.lastProgressionLevel
+  local pointsIncreased = points and self.lastProgressionPoints and points > self.lastProgressionPoints
+
+  self.lastProgressionLevel = level or self.lastProgressionLevel
+  self.lastProgressionPoints = points or self.lastProgressionPoints
+  if levelChanged or pointsIncreased then
+    self:WakeProgression(levelChanged and "player level changed" or "new talent points")
   end
 end
 
@@ -346,7 +436,7 @@ function Runtime:OnProgressionSettingChanged()
   if Plan:IsEnabled() then
     self:WakeProgression("progression setting enabled")
   else
-    self.progressionDue = false
+    self:ClearProgressionSchedule()
   end
 end
 
@@ -430,10 +520,16 @@ function Runtime:CreateDriver()
     return
   end
   local driver = CreateFrame("Frame")
-  driver:SetScript("OnEvent", function(_, event)
-    if event == "ADDON_LOADED" or event == "PLAYER_LOGIN" then
+  driver:SetScript("OnEvent", function(_, event, unit)
+    if event == "ADDON_LOADED" then
       self.attachElapsed = 0.75
-      self:WakeProgression(event)
+    elseif event == "PLAYER_LOGIN" or event == "PLAYER_ENTERING_WORLD" then
+      self.attachElapsed = 0.75
+      self:WakeProgression(event, 1)
+    elseif event == "UNIT_LEVEL" then
+      if unit == "player" then
+        self:WakeProgression(event)
+      end
     elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_LEVEL_UP" or event == "CHARACTER_POINTS_CHANGED" or event == "PLAYER_TALENT_UPDATE" then
       self:WakeProgression(event)
     elseif event == "CHARACTER_ADVANCEMENT_PENDING_BUILD_UPDATED"
@@ -456,11 +552,18 @@ function Runtime:CreateDriver()
       self.attachElapsed = 0
       self:AttachButton()
     end
+    self.progressionSignalElapsed = (self.progressionSignalElapsed or 0) + elapsed
+    if self.progressionSignalElapsed >= PROGRESSION_SIGNAL_INTERVAL then
+      self.progressionSignalElapsed = 0
+      self:PollProgressionSignals()
+    end
     self:Process()
     self:TryProgression()
   end)
   driver:RegisterEvent("PLAYER_LOGIN")
+  driver:RegisterEvent("PLAYER_ENTERING_WORLD")
   driver:RegisterEvent("ADDON_LOADED")
+  driver:RegisterEvent("UNIT_LEVEL")
   driver:RegisterEvent("PLAYER_REGEN_DISABLED")
   driver:RegisterEvent("PLAYER_REGEN_ENABLED")
   driver:RegisterEvent("PLAYER_LEVEL_UP")
@@ -480,13 +583,14 @@ function Runtime:Enable()
   self.enabled = true
   self:CreateDriver()
   self:AttachButton()
-  self:WakeProgression("talent import enabled")
+  self:PollProgressionSignals()
+  self:WakeProgression("talent import enabled", 1)
 end
 
 function Runtime:Disable()
   self:Cancel("Talent import disabled.")
   self.enabled = false
-  self.progressionDue = false
+  self:ClearProgressionSchedule()
   if self.button then
     self.button:Hide()
   end
