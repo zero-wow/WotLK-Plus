@@ -232,8 +232,12 @@ function Rules:ResolveActive(action)
     if action == "auto-quality" then
       local qualityKey = Collector:GetQualityKey(entry.quality)
       if qualityKey then
-        Collector:SetQualityMode(qualityKey, "auto", true)
-        Collector:SetEnabled(true, false, "appearance review")
+        local changed = Collector:SetQualityMode(qualityKey, "auto", true)
+        Collector:SetEnabled(true, true, "appearance review")
+        if changed then
+          local qualityName = string.upper(string.sub(qualityKey, 1, 1)) .. string.sub(qualityKey, 2)
+          printIfEnabled(qualityName .. " appearances are now AUTO; automatic learning is enabled.")
+        end
       end
     end
 

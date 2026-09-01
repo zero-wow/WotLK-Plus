@@ -81,4 +81,73 @@ Collector:ConfirmPendingPopup(0)
 assert(completed == false, "a changed rule or blacklist must cancel the request before the native bind dialog is accepted")
 assert(not Collector.pendingPopup, "invalidated native popup work must be discarded")
 
-io.write("PASS appearance queue prioritizes consent and pauses AUTO behind ASK\n")
+local popupClicked = 0
+local popupShown = true
+local popup = {
+  which = "EQUIP_BIND_CONFIRM",
+  IsShown = function() return popupShown end,
+  GetName = function() return "StaticPopup1" end,
+}
+_G.StaticPopup1 = popup
+_G.StaticPopup1Text = {
+  GetText = function()
+    return "Collecting this appearance will bind Test Item to you."
+  end,
+}
+_G.StaticPopup1Button1 = {
+  IsShown = function() return true end,
+  IsEnabled = function() return true end,
+  Click = function() popupClicked = popupClicked + 1 end,
+}
+_G.StaticPopup1EditBox = {
+  IsShown = function() return false end,
+}
+STATICPOPUP_NUMDIALOGS = 1
+
+Collector.activeRequest = {
+  token = 8,
+  confirmUntil = 1,
+  visiblePopups = {},
+  name = "Test Item",
+}
+Collector.GetRequestState = function()
+  return "ready"
+end
+Collector.pendingPopup = {
+  token = 8,
+  which = popup.which,
+  popup = popup,
+}
+Collector.popupConfirmAt = 0
+Collector:ConfirmPendingPopup(0)
+assert(popupClicked == 1, "an AUTO request must accept Ascension's new appearance-binding popup")
+assert(not Collector.pendingPopup, "a confirmed appearance popup must leave no pending work")
+
+popup.which = "CONFIRM_BINDER"
+assert(not Collector:IsLikelyAppearancePopup(popup.which, popup, Collector.activeRequest), "the innkeeper hearth-binding dialog is not an appearance popup")
+assert(not Collector:IsSafeRequestPopup(popup.which, popup, Collector.activeRequest), "the innkeeper dialog must never pass the request-owned fallback")
+
+popup.which = "ASCENSION_CONFIRM"
+_G.StaticPopup1Text.GetText = function()
+  return "Proceed with this operation?"
+end
+Collector.pendingPopup = {
+  token = 8,
+  which = popup.which,
+  popup = popup,
+}
+Collector.popupConfirmAt = 0
+Collector:ConfirmPendingPopup(0)
+assert(popupClicked == 2, "one new safe popup inside the collection window should use the request-owned fallback")
+
+popup.which = "DELETE_ITEM"
+Collector.pendingPopup = {
+  token = 8,
+  which = popup.which,
+  popup = popup,
+}
+Collector.popupConfirmAt = 0
+Collector:ConfirmPendingPopup(0)
+assert(popupClicked == 2, "a delete popup must never be accepted by automatic appearance collection")
+
+io.write("PASS appearance queue prioritizes consent and safely owns Ascension bind popups\n")

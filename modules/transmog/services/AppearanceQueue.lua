@@ -42,6 +42,26 @@ local function getPopupText(popup)
   return ""
 end
 
+local function hasVisiblePopupEditBox(popup)
+  local popupName = popup and popup.GetName and popup:GetName()
+  local editBox = popupName and _G[popupName .. "EditBox"]
+  return editBox and editBox.IsShown and editBox:IsShown() or false
+end
+
+local function isBlockedPopupKey(popupKey)
+  if popupKey == "CONFIRM_BINDER" then
+    return true
+  end
+
+  return string.find(popupKey, "DELETE", 1, true) ~= nil
+    or string.find(popupKey, "DESTROY", 1, true) ~= nil
+    or string.find(popupKey, "LOOT", 1, true) ~= nil
+    or string.find(popupKey, "QUEST", 1, true) ~= nil
+    or string.find(popupKey, "TRADE", 1, true) ~= nil
+    or string.find(popupKey, "RELOAD", 1, true) ~= nil
+    or string.find(popupKey, "ADDON", 1, true) ~= nil
+end
+
 function Collector:BeginCollectionBatch(source)
   if not self.collectionBatch then
     self.collectionBatch = {
@@ -235,10 +255,12 @@ function Collector:CaptureVisiblePopups()
   return visible
 end
 
-function Collector:FindShownPopup(which)
+function Collector:FindShownPopup(which, request)
   for index = 1, (STATICPOPUP_NUMDIALOGS or 4) do
     local popup = _G["StaticPopup" .. tostring(index)]
-    if popup and popup.IsShown and popup:IsShown() and (not which or popup.which == which) then
+    if popup and popup.IsShown and popup:IsShown()
+        and (not which or popup.which == which)
+        and (not request or not request.visiblePopups or not request.visiblePopups[popup]) then
       return popup
     end
   end
@@ -247,21 +269,15 @@ end
 
 function Collector:IsLikelyAppearancePopup(which, popup, request)
   local popupKey = string.upper(tostring(which or ""))
-  if string.find(popupKey, "DELETE", 1, true)
-      or string.find(popupKey, "DESTROY", 1, true)
-      or string.find(popupKey, "LOOT", 1, true)
-      or string.find(popupKey, "QUEST", 1, true)
-      or string.find(popupKey, "TRADE", 1, true)
-      or string.find(popupKey, "RELOAD", 1, true)
-      or string.find(popupKey, "ADDON", 1, true) then
+  if isBlockedPopupKey(popupKey) then
     return false
   end
 
-  if popupKey == "CONFIRM_BINDER"
-      or string.find(popupKey, "APPEAR", 1, true)
+  if string.find(popupKey, "APPEAR", 1, true)
       or string.find(popupKey, "TRANSMOG", 1, true)
       or string.find(popupKey, "WARDROBE", 1, true)
-      or string.find(popupKey, "COLLECT", 1, true) then
+      or string.find(popupKey, "COLLECT", 1, true)
+      or string.find(popupKey, "BIND", 1, true) then
     return true
   end
 
@@ -269,7 +285,9 @@ function Collector:IsLikelyAppearancePopup(which, popup, request)
   if string.find(popupText, "appearance", 1, true)
       or string.find(popupText, "transmog", 1, true)
       or string.find(popupText, "wardrobe", 1, true)
-      or string.find(popupText, "collect", 1, true) then
+      or string.find(popupText, "collect", 1, true)
+      or string.find(popupText, "bind", 1, true)
+      or string.find(popupText, "soulbound", 1, true) then
     return true
   end
 
@@ -277,7 +295,31 @@ function Collector:IsLikelyAppearancePopup(which, popup, request)
   return itemName and itemName ~= "" and string.find(popupText, itemName, 1, true) ~= nil
 end
 
-function Collector:QueuePopupConfirmation(which, synchronous)
+function Collector:IsSafeRequestPopup(which, popup, request)
+  if not popup or not request or not request.visiblePopups or request.visiblePopups[popup]
+      or isBlockedPopupKey(string.upper(tostring(which or popup.which or "")))
+      or hasVisiblePopupEditBox(popup) then
+    return false
+  end
+
+  local button = getPopupButton(popup, 1)
+  return button and button.IsShown and button:IsShown()
+    and (not button.IsEnabled or button:IsEnabled()) or false
+end
+
+function Collector:GetSafeNewPopupCount(request)
+  local count = 0
+  for index = 1, (STATICPOPUP_NUMDIALOGS or 4) do
+    local popup = _G["StaticPopup" .. tostring(index)]
+    if popup and popup.IsShown and popup:IsShown()
+        and self:IsSafeRequestPopup(popup.which, popup, request) then
+      count = count + 1
+    end
+  end
+  return count
+end
+
+function Collector:QueuePopupConfirmation(which, synchronous, popup)
   local request = self.activeRequest
   if not request or not self:ShouldAutoConfirmBinding(request) then
     return
@@ -287,6 +329,7 @@ function Collector:QueuePopupConfirmation(which, synchronous)
     which = which,
     token = request.token,
     synchronous = synchronous and true or false,
+    popup = popup,
   }
   self.popupConfirmAt = GetTime() + POPUP_CONFIRM_DELAY
 end
@@ -326,9 +369,16 @@ function Collector:DetectNewAppearancePopup(now)
     local popup = _G["StaticPopup" .. tostring(index)]
     if popup and popup.IsShown and popup:IsShown() and not request.visiblePopups[popup] then
       if self:IsLikelyAppearancePopup(popup.which, popup, request) then
-        self:QueuePopupConfirmation(popup.which, false)
+        self:QueuePopupConfirmation(popup.which, false, popup)
         return
       end
+    end
+  end
+
+  if self:GetSafeNewPopupCount(request) == 1 then
+    local popup = self:FindShownPopup(nil, request)
+    if popup and self:IsSafeRequestPopup(popup.which, popup, request) then
+      self:QueuePopupConfirmation(popup.which, false, popup)
     end
   end
 end
@@ -363,7 +413,10 @@ function Collector:ConfirmPendingPopup(now)
     return
   end
 
-  local popup = self:FindShownPopup(pending.which)
+  local popup = pending.popup
+  if not popup or not popup.IsShown or not popup:IsShown() then
+    popup = self:FindShownPopup(pending.which, request)
+  end
   if not popup then
     self.popupConfirmAt = now + POPUP_CONFIRM_DELAY
     return
@@ -374,15 +427,16 @@ function Collector:ConfirmPendingPopup(now)
     return
   end
 
-  local popupName = popup.GetName and popup:GetName()
-  local editBox = popupName and _G[popupName .. "EditBox"]
-  if editBox and editBox.IsShown and editBox:IsShown() then
+  if hasVisiblePopupEditBox(popup) then
     self.pendingPopup = nil
     self.popupConfirmAt = nil
     return
   end
 
-  if not pending.synchronous and not self:IsLikelyAppearancePopup(pending.which, popup, request) then
+  local likelyAppearancePopup = self:IsLikelyAppearancePopup(pending.which, popup, request)
+  local uniqueRequestPopup = self:GetSafeNewPopupCount(request) == 1
+    and self:IsSafeRequestPopup(pending.which, popup, request)
+  if not likelyAppearancePopup and not uniqueRequestPopup then
     self.pendingPopup = nil
     self.popupConfirmAt = nil
     return
